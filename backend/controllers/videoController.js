@@ -2,8 +2,23 @@ const Video = require('../models/Video');
 
 exports.getAllVideos = async (req, res) => {
     try {
+        const { subjectId, batchId, teacherId } = req.query;
+        if (subjectId || batchId || teacherId) {
+            const videos = await Video.findByFilters({ subjectId, batchId, teacherId });
+            return res.json(videos);
+        }
         const videos = await Video.findAll();
         res.json(videos);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.getVideoById = async (req, res) => {
+    try {
+        const video = await Video.findById(req.params.id);
+        if (!video) return res.status(404).json({ error: 'Video not found' });
+        res.json(video);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

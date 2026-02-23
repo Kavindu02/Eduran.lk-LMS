@@ -63,7 +63,7 @@ export default function RegisterPage() {
         .then(res => res.json())
         .then(data => {
           setSubjects(Array.isArray(data) ? data : []);
-          setSelectedMapping({}); // Reset mappings when batch changes
+          setSelectedMapping(prev => Object.keys(prev).length === 0 ? prev : {}); // Avoid redundant resets
           setLoading(false);
         })
         .catch(err => {
@@ -71,8 +71,8 @@ export default function RegisterPage() {
           setLoading(false);
         });
     } else {
-      setSubjects([]);
-      setSelectedMapping({});
+      setSubjects(prev => prev.length === 0 ? prev : []);
+      setSelectedMapping(prev => Object.keys(prev).length === 0 ? prev : {});
     }
   }, [formData.batchId]);
 
@@ -103,20 +103,23 @@ export default function RegisterPage() {
       if (sid in next) {
         delete next[sid]; // De-select
       } else {
-        next[sid] = ""; // Select with no teacher chosen yet
+        next[sid] = []; // Select with no teachers chosen yet
       }
       return next;
     });
     if (error) setError('');
   };
 
-  const handleTeacherChange = (subId, teacherId) => {
+  const toggleTeacher = (subId, teacherId) => {
     if (!subId || !teacherId) return;
     const sid = String(subId);
+    const tid = String(teacherId);
     setSelectedMapping(prev => {
-      // Prevent recursive loop: only set if different
-      if (prev[sid] === teacherId) return prev;
-      return { ...prev, [sid]: teacherId };
+      const currentTeachers = prev[sid] || [];
+      const nextTeachers = currentTeachers.includes(tid)
+        ? currentTeachers.filter(id => id !== tid)
+        : [...currentTeachers, tid];
+      return { ...prev, [sid]: nextTeachers };
     });
   };
 
@@ -135,6 +138,15 @@ export default function RegisterPage() {
       return;
     }
     
+    // Check if each selected subject has at least one teacher
+    const missingTeacher = selectedIds.find(sid => (selectedMapping[sid] || []).length === 0);
+    if (missingTeacher) {
+      const sub = subjects.find(s => String(s.id) === missingTeacher);
+      setError(`Please select at least one teacher for ${sub?.name || 'subject'}`);
+      toast.error(`Please select at least one teacher for ${sub?.name || 'subject'}`);
+      return;
+    }
+
     setLoading(true);
     setError('');
     
@@ -142,10 +154,16 @@ export default function RegisterPage() {
       const { email, password, firstName, lastName, ...rest } = formData;
       
       // Prepare selected subjects with their teachers
-      const subjectData = selectedIds.map(sId => ({
-        subjectId: sId,
-        teacherId: selectedMapping[sId]
-      }));
+      const subjectData = [];
+      selectedIds.forEach(sId => {
+        const teachers = selectedMapping[sId] || [];
+        teachers.forEach(tId => {
+          subjectData.push({
+            subjectId: sId,
+            teacherId: tId
+          });
+        });
+      });
 
       const result = await register(email, password, `${firstName} ${lastName}`, { 
         firstName, 
@@ -367,10 +385,11 @@ export default function RegisterPage() {
                                       <p className="text-[10px] text-white/30 font-black tracking-widest uppercase mt-1 leading-none">{sub.code || '---'}</p>
                                     </div>
                                   </div>
-                                  <div className="ml-4 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                                  <div className="ml-4 flex-shrink-0">
                                     <Checkbox 
                                       checked={isSelected} 
                                       onCheckedChange={() => toggleSubject(sub.id)}
+                                      onClick={(e) => e.stopPropagation()}
                                       className="border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
                                     />
                                   </div>
@@ -393,31 +412,44 @@ export default function RegisterPage() {
                               const sub = (subjects || []).find(s => s && String(s.id) === sid);
                               if (!sub) return null;
                               
-                              const subTeachers = (allTeachers || []).filter(t => t && t.subjectId === sid);
+                              const subTeachers = (allTeachers || []).filter(t => t && String(t.subjectId) === sid);
+                              const selectedTeachers = selectedMapping[sid] || [];
                               
                               return (
                                 <div key={`t-sel-${sid}`} className="bg-black/60 border border-white/10 rounded-2xl p-4 space-y-3">
-                                  <div className="flex items-center justify-between">
-                                    <h4 className="text-emerald-500 font-black uppercase tracking-widest text-[9px]">{sub.name || 'Subject'} Teacher</h4>
-                                    <span className="bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full text-[8px] font-black uppercase">Required</span>
+                                  <div className="flex items-center justify-between pb-2 border-b border-white/5">
+                                    <h4 className="text-emerald-500 font-black uppercase tracking-widest text-[9px]">{sub.name || 'Subject'} Teachers</h4>
+                                    <span className="bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full text-[8px] font-black uppercase">Click to Select</span>
                                   </div>
                                   
-                                  <Select 
-                                    onValueChange={(v) => handleTeacherChange(sid, v)} 
-                                    value={selectedMapping[sid] || ""}
-                                  >
-                                    <SelectTrigger className="h-10 bg-white/5 border-white/10 text-white rounded-xl">
-                                      <SelectValue placeholder="CHOOSE TEACHER" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-[#06120c] border-white/10 text-white">
-                                      {subTeachers.map(t => (
-                                        <SelectItem key={`t-opt-${sid}-${t.id}`} value={String(t.id)}>{t.name}</SelectItem>
-                                      ))}
-                                      {subTeachers.length === 0 && (
-                                        <SelectItem disabled value="none">No teachers for this subject</SelectItem>
-                                      )}
-                                    </SelectContent>
-                                  </Select>
+                                  <div className="grid gap-2">
+                                    {subTeachers.map(t => {
+                                      const tid = String(t.id);
+                                      const isChosen = selectedTeachers.includes(tid);
+                                      return (
+                                        <div 
+                                          key={`t-opt-${sid}-${t.id}`} 
+                                          className={`flex items-center gap-3 p-2 rounded-xl border transition-all cursor-pointer ${isChosen ? 'bg-emerald-500/10 border-emerald-500/40' : 'bg-white/5 border-transparent hover:bg-white/10'}`}
+                                          onClick={() => toggleTeacher(sid, t.id)}
+                                        >
+                                          <Checkbox 
+                                            checked={isChosen} 
+                                            onCheckedChange={() => toggleTeacher(sid, t.id)}
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
+                                          />
+                                          <div className="flex-1 overflow-hidden">
+                                            <p className="text-[11px] font-bold text-white truncate">{t.name}</p>
+                                            <p className="text-[9px] text-white/30 font-black tracking-widest uppercase truncate">{t.qualification || 'EXPERIENCED TEACHER'}</p>
+                                          </div>
+                                          {isChosen && <Check className="w-3 h-3 text-emerald-500" />}
+                                        </div>
+                                      );
+                                    })}
+                                    {subTeachers.length === 0 && (
+                                      <p className="text-[10px] text-white/20 italic p-2 text-center">No teachers registered for this subject</p>
+                                    )}
+                                  </div>
                                 </div>
                               );
                             })

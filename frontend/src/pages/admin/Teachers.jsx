@@ -11,55 +11,46 @@ export default function TeachersPage() {
     const [batches, setBatches] = useState([]);
     const [subjects, setSubjects] = useState([]);
     const [teachers, setTeachers] = useState([]);
-    const [selectedBatch, setSelectedBatch] = useState('');
-    const [selectedSubject, setSelectedSubject] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingTeacher, setEditingTeacher] = useState(null);
-    const [formData, setFormData] = useState({ name: '', email: '', qualification: '', subjectId: '' });
+    const [formData, setFormData] = useState({ name: '', email: '', qualification: '', batchId: '', subjectId: '' });
 
-    // Fetch batches from backend
+    // Fetch batches and teachers on mount
     useEffect(() => {
         fetch('/api/batches')
             .then(res => res.json())
-            .then(data => {
-                setBatches(data);
-                if (data.length > 0) setSelectedBatch(data[0].id);
-            });
+            .then(data => setBatches(data));
+        
+        fetch('/api/teachers')
+            .then(res => res.json())
+            .then(data => setTeachers(data));
     }, []);
 
-    // Fetch subjects for selected batch from backend
+    // Update subjects when batchId changes in the form
     useEffect(() => {
-        if (selectedBatch) {
-            fetch(`/api/subjects?batchId=${selectedBatch}`)
+        if (formData.batchId) {
+            fetch(`/api/subjects?batchId=${formData.batchId}`)
                 .then(res => res.json())
-                .then(data => {
-                    setSubjects(data);
-                    setSelectedSubject(''); // Always reset subject selection
-                });
+                .then(data => setSubjects(data));
         } else {
             setSubjects([]);
-            setSelectedSubject('');
         }
-    }, [selectedBatch]);
-
-    // Fetch teachers for selected subject from backend
-    useEffect(() => {
-        if (selectedSubject) {
-            fetch(`/api/teachers/subject/${selectedSubject}`)
-                .then(res => res.json())
-                .then(data => setTeachers(data));
-        } else {
-            setTeachers([]);
-        }
-    }, [selectedSubject]);
+    }, [formData.batchId]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!selectedSubject) {
+        if (!formData.subjectId) {
             alert('Please select a subject');
             return;
         }
-        const data = { ...formData, subjectId: selectedSubject };
+        
+        const data = { 
+            name: formData.name, 
+            email: formData.email, 
+            qualification: formData.qualification, 
+            subjectId: formData.subjectId 
+        };
+
         if (editingTeacher) {
             fetch(`/api/teachers/${editingTeacher.id}`, {
                 method: 'PUT',
@@ -79,14 +70,23 @@ export default function TeachersPage() {
     };
 
     const reloadTeachers = () => {
-        fetch(`/api/teachers/subject/${selectedSubject}`)
+        fetch('/api/teachers')
             .then(res => res.json())
             .then(data => setTeachers(data));
     };
 
     const handleEdit = (teacher) => {
         setEditingTeacher(teacher);
-        setFormData({ name: teacher.name, email: teacher.email, qualification: teacher.qualification, subjectId: teacher.subjectId });
+        // Find batchId of this teacher's subject if possible
+        // For now, reset it so user can choose. 
+        // Better: Fetch all subjects to find the matching batchId
+        setFormData({ 
+            name: teacher.name, 
+            email: teacher.email, 
+            qualification: teacher.qualification, 
+            batchId: '', // Reset batch selection on edit for now
+            subjectId: teacher.subjectId 
+        });
         setIsDialogOpen(true);
     };
 
@@ -100,7 +100,7 @@ export default function TeachersPage() {
     const closeDialog = () => {
         setIsDialogOpen(false);
         setEditingTeacher(null);
-        setFormData({ name: '', email: '', qualification: '', subjectId: '' });
+        setFormData({ name: '', email: '', qualification: '', batchId: '', subjectId: '' });
     };
 
     return (
@@ -140,8 +140,28 @@ export default function TeachersPage() {
                                     <Input value={formData.qualification} onChange={(e) => setFormData({ ...formData, qualification: e.target.value })} placeholder="e.g., M.Sc Physics" className="border-border/50" />
                                 </div>
                                 <div className="space-y-2">
+                                    <label className="text-sm font-medium text-foreground">Batch</label>
+                                    <select 
+                                        value={formData.batchId} 
+                                        onChange={e => setFormData({ ...formData, batchId: e.target.value, subjectId: '' })} 
+                                        className="w-full border border-border/50 rounded-md px-3 py-2 bg-background text-foreground text-sm" 
+                                        required
+                                    >
+                                        <option value="">Choose batch...</option>
+                                        {batches.map(batch => (
+                                            <option key={batch.id} value={batch.id}>{batch.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
                                     <label className="text-sm font-medium text-foreground">Subject</label>
-                                    <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} className="w-full border border-border/50 rounded-md px-3 py-2 bg-background text-foreground text-sm" required>
+                                    <select 
+                                        value={formData.subjectId} 
+                                        onChange={e => setFormData({ ...formData, subjectId: e.target.value })} 
+                                        className="w-full border border-border/50 rounded-md px-3 py-2 bg-background text-foreground text-sm" 
+                                        required
+                                        disabled={!formData.batchId}
+                                    >
                                         <option value="">Choose subject...</option>
                                         {subjects.map(subject => (
                                             <option key={subject.id} value={subject.id}>{subject.name}</option>
@@ -155,24 +175,6 @@ export default function TeachersPage() {
                             </form>
                         </DialogContent>
                     </Dialog>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-sm font-medium text-foreground">Select Batch:</label>
-                        <select value={selectedBatch} onChange={e => setSelectedBatch(e.target.value)} className="w-full border border-border/50 rounded-md px-3 py-2 bg-background text-foreground text-sm mt-1">
-                            {batches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="text-sm font-medium text-foreground">Select Subject:</label>
-                        <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} className="w-full border border-border/50 rounded-md px-3 py-2 bg-background text-foreground text-sm mt-1" disabled={subjects.length === 0}>
-                            <option value="">Choose subject...</option>
-                            {subjects.map(subject => (
-                                <option key={subject.id} value={subject.id}>{subject.name}</option>
-                            ))}
-                        </select>
-                    </div>
                 </div>
 
                 <div className="space-y-4">
@@ -200,7 +202,7 @@ export default function TeachersPage() {
                 {teachers.length === 0 && (
                     <Card className="border-border/50">
                         <CardContent className="py-12 text-center text-foreground/70">
-                            {selectedSubject ? 'No teachers for this subject' : 'Please select a subject'}
+                            No teachers registered.
                         </CardContent>
                     </Card>
                 )}

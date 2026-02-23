@@ -17,9 +17,18 @@ import {
 
 export default function Home() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [currentImage, setCurrentImage] = useState(0);
   const [progress, setProgress] = useState(0);
+
+  // Force logout on home hit to clear stuck sessions
+  useEffect(() => {
+    if (user) {
+      logout();
+      window.location.reload();
+    }
+  }, []);
+
   const heroImages = [
     '/hero.jpg',
     '/male-scientist-carefully-studies-his-data.jpg',
@@ -92,25 +101,19 @@ export default function Home() {
               </div>
 
               <div className="flex items-center gap-8 animate-fadeInRight" style={{ animationDelay: '0.5s' }}>
-                {user ? (
-                   <Link to={user.role === 'admin' ? "/admin/dashboard" : "/student/dashboard"} className="group relative">
-                     <div className="absolute -inset-0.5 bg-emerald-500 rounded-full opacity-0 group-hover:opacity-40 blur transition duration-500" />
-                     <Button className="relative h-12 px-10 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-black tracking-[0.25em] rounded-full transition-all duration-500 uppercase shadow-[4px_4px_0_0_rgba(16,185,129,0.3)] active:scale-95 border-none flex items-center gap-2">
-                       <LayoutDashboard className="w-4 h-4" />
-                       <span className="relative">Dashboard</span>
-                     </Button>
-                   </Link>
-                ) : (
-                   <Link to="/login" className="group relative">
-                     {/* Outer Glow Effect */}
-                     <div className="absolute -inset-0.5 bg-emerald-500 rounded-full opacity-0 group-hover:opacity-40 blur transition duration-500" />
-                     <Button className="relative h-12 px-10 bg-white hover:bg-emerald-600 text-black hover:text-white text-[11px] font-black tracking-[0.25em] rounded-full transition-all duration-500 uppercase shadow-[4px_4px_0_0_rgba(16,185,129,0.3)] active:scale-95 border-none overflow-hidden">
-                       {/* Background Shine Effect */}
-                       <div className="absolute -inset-full bg-gradient-to-r from-transparent via-emerald-500/10 to-transparent rotate-45 translate-x-[-150%] group-hover:translate-x-[150%] duration-1000 transition-transform" />
-                       <span className="relative">Get Started</span>
-                     </Button>
-                   </Link>
-                )}
+                <Link 
+                  to={user ? (user.role?.toLowerCase() === 'admin' ? "/admin/dashboard" : "/student/dashboard") : "/login"} 
+                  className="group relative block"
+                >
+                  {/* Outer Glow Effect */}
+                  <div className="absolute -inset-0.5 bg-emerald-500 rounded-full opacity-0 group-hover:opacity-40 blur transition duration-500" />
+                  
+                  {/* Styled Button */}
+                  <Button className="relative h-12 px-10 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-black tracking-[0.25em] rounded-full transition-all duration-500 uppercase shadow-[4px_4px_0_0_rgba(16,185,129,0.3)] active:scale-95 border-none flex items-center gap-2 pointer-events-none">
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span className="relative">GET STARTED</span>
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

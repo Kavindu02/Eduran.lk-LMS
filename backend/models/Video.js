@@ -2,10 +2,10 @@ const db = require('../config/db');
 
 class Video {
     static async create(videoData) {
-        const { id, title, description, youtubeUrl, duration, subjectId, batchId } = videoData;
+        const { id, title, description, youtubeUrl, duration, subjectId, batchId, teacherId } = videoData;
         const [result] = await db.execute(
-            'INSERT INTO videos (id, title, description, youtubeUrl, duration, subjectId, batchId) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [id, title, description || null, youtubeUrl, duration || null, subjectId, batchId]
+            'INSERT INTO videos (id, title, description, youtubeUrl, duration, subjectId, batchId, teacherId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, title, description || null, youtubeUrl, duration || null, subjectId, batchId, teacherId || null]
         );
         return result;
     }
@@ -15,6 +15,11 @@ class Video {
         return rows;
     }
 
+    static async findById(id) {
+        const [rows] = await db.execute('SELECT * FROM videos WHERE id = ?', [id]);
+        return rows[0];
+    }
+
     static async findByBatch(batchId) {
         const [rows] = await db.execute('SELECT * FROM videos WHERE batchId = ?', [batchId]);
         return rows;
@@ -22,6 +27,28 @@ class Video {
 
     static async findBySubject(subjectId) {
         const [rows] = await db.execute('SELECT * FROM videos WHERE subjectId = ?', [subjectId]);
+        return rows;
+    }
+
+    static async findByFilters({ subjectId, batchId, teacherId }) {
+        let query = 'SELECT * FROM videos WHERE 1=1';
+        const params = [];
+
+        if (subjectId) {
+            query += ' AND subjectId = ?';
+            params.push(subjectId);
+        }
+        if (batchId) {
+            query += ' AND batchId = ?';
+            params.push(batchId);
+        }
+        if (teacherId) {
+            query += ' AND teacherId = ?';
+            params.push(teacherId);
+        }
+
+        query += ' ORDER BY createdAt DESC';
+        const [rows] = await db.execute(query, params);
         return rows;
     }
 

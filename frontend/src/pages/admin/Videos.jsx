@@ -11,6 +11,7 @@ export default function VideosPage() {
     const [videos, setVideos] = useState([]);
     const [batches, setBatches] = useState([]);
     const [subjects, setSubjects] = useState([]);
+    const [teachers, setTeachers] = useState([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingVideo, setEditingVideo] = useState(null);
     const [selectedBatch, setSelectedBatch] = useState('');
@@ -20,6 +21,7 @@ export default function VideosPage() {
         youtubeUrl: '',
         subjectId: '',
         batchId: '',
+        teacherId: '',
         duration: '',
     });
 
@@ -27,6 +29,11 @@ export default function VideosPage() {
         fetch('/api/batches')
             .then(res => res.json())
             .then(data => setBatches(data));
+        
+        fetch('/api/teachers')
+            .then(res => res.json())
+            .then(data => setTeachers(data));
+            
         loadVideos();
     }, []);
 
@@ -84,6 +91,7 @@ export default function VideosPage() {
             youtubeUrl: video.youtubeUrl,
             subjectId: video.subjectId,
             batchId: video.batchId,
+            teacherId: video.teacherId || '',
             duration: video.duration,
         });
         setIsDialogOpen(true);
@@ -100,10 +108,15 @@ export default function VideosPage() {
         setIsDialogOpen(false);
         setEditingVideo(null);
         setSelectedBatch('');
-        setFormData({ title: '', description: '', youtubeUrl: '', subjectId: '', batchId: '', duration: '' });
+        setFormData({ title: '', description: '', youtubeUrl: '', subjectId: '', batchId: '', teacherId: '', duration: '' });
     };
 
     const filteredVideos = selectedBatch ? videos.filter(v => v.batchId === selectedBatch) : videos;
+    const getTeacherName = (id) => {
+        const teacher = teachers.find(t => t.id === id);
+        return teacher ? teacher.name : 'Unknown Teacher';
+    };
+
     return (<ProtectedLayout requiredRole="admin" title="Manage Videos">
       <div className="space-y-6">
         <Link to="/admin/dashboard">
@@ -149,6 +162,25 @@ export default function VideosPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Select Teacher</label>
+                  <select 
+                    value={formData.teacherId} 
+                    onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })} 
+                    className="w-full border border-border/50 rounded-md px-3 py-2 bg-background text-foreground text-sm" 
+                    required 
+                    disabled={!formData.subjectId}
+                  >
+                    <option value="">Choose teacher...</option>
+                    {teachers
+                      .filter(t => t.subjectId === formData.subjectId)
+                      .map(t => <option key={t.id} value={t.id}>{t.name}</option>)
+                    }
+                  </select>
+                  {formData.subjectId && teachers.filter(t => t.subjectId === formData.subjectId).length === 0 && (
+                    <p className="text-[10px] text-destructive mt-1">No teachers found for this subject.</p>
+                  )}
+                </div>
+                <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Video Title</label>
                   <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="e.g., Algebra Basics" className="border-border/50" required/>
                 </div>
@@ -189,8 +221,11 @@ export default function VideosPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredVideos.map(video => (<Card key={video.id} className="border-border/50">
-              <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                <div className="text-xs text-primary font-medium bg-primary/10 px-3 py-1 rounded-full">{video.duration}</div>
+              <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center relative">
+                <div className="absolute top-2 right-2 text-[10px] text-primary font-bold bg-white/90 px-2 py-0.5 rounded-full shadow-sm">{video.duration}</div>
+                <div className="absolute bottom-2 left-2 text-[10px] text-white font-bold bg-black/40 px-2 py-0.5 rounded-sm backdrop-blur-sm border border-white/10 uppercase tracking-tighter">
+                   By: {getTeacherName(video.teacherId)}
+                </div>
               </div>
               <CardHeader>
                 <CardTitle className="text-foreground">{video.title}</CardTitle>

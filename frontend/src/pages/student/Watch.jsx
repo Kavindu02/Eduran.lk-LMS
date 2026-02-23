@@ -2,113 +2,143 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ProtectedLayout from '@/components/protected-layout';
 import { useAuth } from '@/lib/auth-context';
-import { getAllVideos, getSubjectById } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Clock } from 'lucide-react';
+
+const API_URL = 'http://localhost:5000/api';
+
 export default function WatchVideoPage() {
     const params = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
     const videoId = params.id;
     const [video, setVideo] = useState(null);
-    const [subject, setSubject] = useState(null);
-    const [relatedVideos, setRelatedVideos] = useState([]);
     const [loading, setLoading] = useState(true);
+
     useEffect(() => {
-        if (!user?.batchId)
-            return;
-        const allVideos = getAllVideos();
-        const foundVideo = allVideos.find(v => v.id === videoId && v.batchId === user.batchId);
-        if (foundVideo) {
-            setVideo(foundVideo);
-            const subjectData = getSubjectById(foundVideo.subjectId);
-            setSubject(subjectData);
-            const relatedVids = allVideos.filter(v => v.subjectId === foundVideo.subjectId && v.batchId === user.batchId && v.id !== videoId);
-            setRelatedVideos(relatedVids);
-        }
-        setLoading(false);
-    }, [videoId, user?.batchId]);
+        const fetchVideo = async () => {
+            try {
+                const res = await fetch(`${API_URL}/videos/${videoId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setVideo(data);
+                }
+            } catch (error) {
+                console.error('Error fetching video:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (videoId) fetchVideo();
+    }, [videoId]);
+
+    const getYoutubeId = (url) => {
+        if (!url) return '';
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : '';
+    };
+
     if (loading) {
-        return (<ProtectedLayout requiredRole="student">
-        <div className="flex items-center justify-center py-12">
-          <p className="text-foreground/70">Loading...</p>
-        </div>
-      </ProtectedLayout>);
+        return (
+            <ProtectedLayout requiredRole="student">
+                <div className="flex items-center justify-center py-20">
+                    <p className="text-white/60 uppercase tracking-[0.2em] text-[10px] font-black animate-pulse">Initializing Interface...</p>
+                </div>
+            </ProtectedLayout>
+        );
     }
+
     if (!video) {
-        return (<ProtectedLayout requiredRole="student">
-        <div className="text-center py-12 space-y-4">
-          <p className="text-foreground/70">Video not found</p>
-          <Button variant="outline" onClick={() => navigate('/student/dashboard')} className="border-border/50">
-            <ArrowLeft className="w-4 h-4 mr-2"/>
-            Back to Dashboard
-          </Button>
-        </div>
-      </ProtectedLayout>);
+        return (
+            <ProtectedLayout requiredRole="student">
+                <div className="text-center py-24 space-y-6">
+                    <p className="text-white/30 font-bold uppercase tracking-widest text-[11px]">Material Missing or Removed</p>
+                    <Button variant="outline" onClick={() => navigate('/student/dashboard')} className="border-white/10 hover:bg-white/5 text-white bg-transparent rounded-xl px-10 h-14 uppercase font-black tracking-widest text-[10px]">
+                        <ArrowLeft className="w-4 h-4 mr-3 text-emerald-500" />
+                        Return to Command Center
+                    </Button>
+                </div>
+            </ProtectedLayout>
+        );
     }
-    return (<ProtectedLayout requiredRole="student" title={video.title}>
-      <div className="space-y-8">
-        {/* Back Button */}
-        <Button variant="outline" onClick={() => navigate('/student/dashboard')} className="border-border/50">
-          <ArrowLeft className="w-4 h-4 mr-2"/>
-          Back to Dashboard
-        </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Video Player */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-muted rounded-lg overflow-hidden aspect-video flex items-center justify-center">
-              <iframe width="100%" height="100%" src={video.youtubeUrl} title={video.title} frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
-            </div>
+    const embedUrl = `https://www.youtube.com/embed/${getYoutubeId(video.youtubeUrl)}`;
 
-            {/* Video Info */}
-            <Card className="border-border/50">
-              <CardHeader>
-                <div className="space-y-2">
-                  <CardTitle className="text-2xl text-foreground">{video.title}</CardTitle>
-                  <CardDescription className="text-base">{subject?.name}</CardDescription>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-4 text-sm text-foreground/70">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4"/>
-                    <span>Duration: {video.duration}</span>
-                  </div>
-                </div>
+    return (
+        <ProtectedLayout requiredRole="student" title={video.title}>
+            <div className="space-y-10 animate-fadeIn font-sans">
+                {/* Back Button */}
+                <button 
+                  onClick={() => navigate('/student/dashboard')} 
+                  className="flex items-center gap-2 text-white/40 hover:text-emerald-500 transition-colors uppercase font-black tracking-[0.3em] text-[10px]"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back Access
+                </button>
 
-                <div className="border-t border-border/30 pt-4">
-                  <h4 className="font-semibold text-foreground mb-2">About this video</h4>
-                  <p className="text-foreground/70 leading-relaxed">{video.description}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Related Videos Sidebar */}
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-foreground mb-4">More from {subject?.name}</h3>
-              {relatedVideos.length > 0 ? (<div className="space-y-3">
-                  {relatedVideos.map(relatedVideo => (<Card key={relatedVideo.id} className="border-border/50 overflow-hidden cursor-pointer hover:border-primary/30 transition-colors" onClick={() => navigate(`/student/watch/${relatedVideo.id}`)}>
-                      <div className="aspect-video bg-muted flex items-center justify-center relative">
-                        <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                          <span className="text-xs text-muted-foreground">{relatedVideo.duration}</span>
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+                    {/* Video Player */}
+                    <div className="lg:col-span-3 space-y-8">
+                        <div className="rounded-3xl overflow-hidden aspect-video bg-black/40 border border-white/5 shadow-2xl relative">
+                            {video.youtubeUrl ? (
+                              <iframe 
+                                width="100%" height="100%" 
+                                src={embedUrl} 
+                                title={video.title} 
+                                frameBorder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowFullScreen
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-[#0a1a12]">
+                                <p className="text-white/20 uppercase font-black tracking-widest text-xs">Video Feed Offline</p>
+                              </div>
+                            )}
                         </div>
-                      </div>
-                      <CardContent className="p-3">
-                        <p className="text-sm font-medium text-foreground line-clamp-2">{relatedVideo.title}</p>
-                      </CardContent>
-                    </Card>))}
-                </div>) : (<Card className="border-border/50">
-                  <CardContent className="py-6 text-center text-sm text-foreground/70">
-                    No related videos
-                  </CardContent>
-                </Card>)}
+
+                        {/* Video Info */}
+                        <div className="bg-black/20 border border-white/5 rounded-3xl p-8 md:p-10 space-y-6">
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-1 h-8 bg-emerald-500 rounded-full" />
+                                  <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight">{video.title}</h1>
+                                </div>
+                                <div className="flex items-center gap-6">
+                                    <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-lg">
+                                        <Clock className="w-3.5 h-3.5" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">{video.duration || 'Full Session'}</span>
+                                    </div>
+                                    <span className="text-white/30 text-[10px] font-black uppercase tracking-widest">Recorded: {new Date(video.createdAt).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+
+                            <div className="border-t border-white/5 pt-8">
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-4">Lesson Abstract</h4>
+                                <p className="text-white/60 leading-relaxed font-medium italic font-serif text-lg">
+                                    {video.description || 'Access complete educational support materials through our student portal.'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Sidebar Placeholder / Controls */}
+                    <div className="space-y-6">
+                        <div className="bg-[#0a1a12] border border-white/5 rounded-3xl p-6">
+                            <h3 className="text-white font-black uppercase tracking-widest text-[11px] mb-4 pb-2 border-b border-white/5">Quick Navigation</h3>
+                            <div className="space-y-3">
+                                <Button 
+                                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest text-[9px] rounded-xl h-11"
+                                    onClick={() => navigate('/student/dashboard')}
+                                >
+                                    Switch Subject
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </ProtectedLayout>);
+        </ProtectedLayout>
+    );
 }

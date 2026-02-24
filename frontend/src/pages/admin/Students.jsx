@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-import { Users, Eye, Edit2, Search, UserCheck, Calendar, BookOpen, GraduationCap, MapPin, School, Phone, CreditCard, Trash2, Plus, Save, X, ChevronLeft, ShieldCheck, UserPlus, Filter, Download } from 'lucide-react';
+import { Users, Eye, Edit2, Search, UserCheck, Calendar, BookOpen, GraduationCap, MapPin, School, Phone, CreditCard, Trash2, Plus, Save, X, ChevronLeft, ShieldCheck, UserPlus, Filter, Download, Mail, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -123,12 +123,12 @@ export default function StudentsPage() {
         }
     };
 
-    const handleRemoveSubject = async (subjectId) => {
+    const handleRemoveSubject = async (subjectId, teacherId = null) => {
         try {
             const res = await fetch('/api/users/remove-subject', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: selectedStudent.id, subjectId })
+                body: JSON.stringify({ userId: selectedStudent.id, subjectId, teacherId })
             });
             if (res.ok) {
                 toast.success('Subject removed');
@@ -173,7 +173,7 @@ export default function StudentsPage() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h2 className="text-3xl font-bold tracking-tight text-slate-900">Student Registry</h2>
-                        <p className="text-slate-500 text-sm">Manage student profiles, academic mapping and enrollments.</p>
+                        <p className="text-slate-500 text-sm">Manage student profiles and enrollments.</p>
                     </div>
                     
                     <div className="flex items-center gap-3 w-full md:w-auto">
@@ -195,7 +195,6 @@ export default function StudentsPage() {
                             <TableRow className="hover:bg-transparent border-none">
                                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-800 py-4 px-6">Identity Reference</TableHead>
                                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-800 py-4 px-6">Contact Vector</TableHead>
-                                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-800 py-4 px-6">Academic Mapping</TableHead>
                                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-800 py-4 px-6">Status</TableHead>
                                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-800 py-4 px-6 text-right">Settings</TableHead>
                             </TableRow>
@@ -203,7 +202,7 @@ export default function StudentsPage() {
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-40 text-center">
+                                    <TableCell colSpan={4} className="h-40 text-center">
                                         <div className="flex flex-col items-center gap-2">
                                             <div className="w-8 h-8 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
                                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Syncing Records...</span>
@@ -212,7 +211,7 @@ export default function StudentsPage() {
                                 </TableRow>
                             ) : filteredStudents.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-40 text-center">
+                                    <TableCell colSpan={4} className="h-40 text-center">
                                         <div className="flex flex-col items-center gap-2">
                                             <Users className="w-8 h-8 text-slate-200" />
                                             <p className="text-sm font-bold text-slate-400 uppercase italic">No students indexed</p>
@@ -250,20 +249,6 @@ export default function StudentsPage() {
                                             </div>
                                         </TableCell>
                                         <TableCell className="py-4 px-6">
-                                            <div className="flex flex-wrap gap-1">
-                                                {student.selectedSubjects?.slice(0, 2).map((sub, idx) => (
-                                                    <Badge key={idx} variant="secondary" className="bg-white border border-slate-200 text-slate-600 text-[8px] font-black uppercase tracking-tighter">
-                                                        {sub.subjectName}
-                                                    </Badge>
-                                                )) || <span className="text-[9px] text-slate-300 font-bold uppercase italic">Unmapped</span>}
-                                                {(student.selectedSubjects?.length > 2) && (
-                                                    <Badge variant="secondary" className="bg-slate-50 text-slate-400 text-[8px] font-black">
-                                                        +{student.selectedSubjects.length - 2}
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="py-4 px-6">
                                             <Badge className={`text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full ${student.status === 'suspended' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
                                                 {student.status || 'Active'}
                                             </Badge>
@@ -298,34 +283,38 @@ export default function StudentsPage() {
             </div>
 
 
-            {/* Edit Mainframe Dialog - Diamond Design */}
+            {/* Edit Student Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white border-slate-200">
                     <DialogHeader className="border-b border-slate-100 pb-4">
-                        <DialogTitle className="text-2xl font-black uppercase italic text-slate-900 tracking-tighter">
-                            Modify Identity <span className="text-emerald-600">Parameters</span>
+                        <DialogTitle className="text-xl font-black italic uppercase text-slate-900 tracking-tight">
+                            Edit Student Profile
                         </DialogTitle>
-                        <DialogDescription className="text-xs font-black uppercase tracking-widest text-slate-400">
-                            Updating data for Student ID-{selectedStudent?.id}
+                        <DialogDescription className="text-emerald-600 font-bold text-[10px] uppercase tracking-widest">
+                            Update academic and contact information
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
                         {/* Column 1: Core Fields */}
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">First Name</label>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
+                                        <User className="w-3 h-3 text-emerald-500" /> First Name
+                                    </label>
                                     <Input 
-                                        className="h-9 text-sm border-slate-200 font-bold"
+                                        className="h-10 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                                         value={editData.firstName}
                                         onChange={(e) => setEditData({...editData, firstName: e.target.value})}
                                     />
                                 </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Last Name</label>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
+                                        <User className="w-3 h-3 text-emerald-500" /> Last Name
+                                    </label>
                                     <Input 
-                                        className="h-9 text-sm border-slate-200 font-bold"
+                                        className="h-10 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                                         value={editData.lastName}
                                         onChange={(e) => setEditData({...editData, lastName: e.target.value})}
                                     />
@@ -333,79 +322,25 @@ export default function StudentsPage() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Primary Contact</label>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
+                                        <Phone className="w-3 h-3 text-emerald-500" /> Primary Contact
+                                    </label>
                                     <Input 
-                                        className="h-9 text-sm border-slate-200 font-bold"
+                                        className="h-10 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                                         value={editData.phoneNumber1}
                                         onChange={(e) => setEditData({...editData, phoneNumber1: e.target.value})}
                                     />
                                 </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Secondary Contact</label>
-                                    <Input 
-                                        className="h-9 text-sm border-slate-200 font-bold"
-                                        value={editData.phoneNumber2}
-                                        onChange={(e) => setEditData({...editData, phoneNumber2: e.target.value})}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email Endpoint</label>
-                                <Input 
-                                    className="h-9 text-sm border-slate-200 font-bold"
-                                    value={editData.email}
-                                    onChange={(e) => setEditData({...editData, email: e.target.value})}
-                                />
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Residency Address</label>
-                                <Input 
-                                    className="h-9 text-sm border-slate-200 font-bold"
-                                    value={editData.homeAddress}
-                                    onChange={(e) => setEditData({...editData, homeAddress: e.target.value})}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">NIC Identifier</label>
-                                    <Input 
-                                        className="h-9 text-sm border-slate-200 font-bold"
-                                        value={editData.nic}
-                                        onChange={(e) => setEditData({...editData, nic: e.target.value})}
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</label>
-                                    <Select 
-                                        value={editData.status} 
-                                        onValueChange={(val) => setEditData({...editData, status: val})}
-                                    >
-                                        <SelectTrigger className="h-9 text-xs border-slate-200 font-bold">
-                                            <SelectValue placeholder="Status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="active">Active</SelectItem>
-                                            <SelectItem value="suspended">Suspended</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Column 2: Academic & Subjects */}
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Current Batch</label>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
+                                        <Users className="w-3 h-3 text-emerald-500" /> Current Batch
+                                    </label>
                                     <Select 
                                         value={editData.batchId} 
                                         onValueChange={(val) => setEditData({...editData, batchId: val})}
                                     >
-                                        <SelectTrigger className="h-9 text-xs border-emerald-100 bg-emerald-50/30 text-emerald-700 font-bold">
+                                        <SelectTrigger className="h-10 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20">
                                             <SelectValue placeholder="Select Batch" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -415,29 +350,72 @@ export default function StudentsPage() {
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">A/L Year</label>
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
+                                    <Mail className="w-3 h-3 text-emerald-500" /> Email Endpoint
+                                </label>
+                                <Input 
+                                    className="h-10 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20"
+                                    value={editData.email}
+                                    onChange={(e) => setEditData({...editData, email: e.target.value})}
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
+                                    <MapPin className="w-3 h-3 text-emerald-500" /> Residency Address
+                                </label>
+                                <Input 
+                                    className="h-10 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20"
+                                    value={editData.homeAddress}
+                                    onChange={(e) => setEditData({...editData, homeAddress: e.target.value})}
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
+                                    <CreditCard className="w-3 h-3 text-emerald-500" /> NIC Identifier
+                                </label>
+                                <Input 
+                                    className="h-10 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20"
+                                    value={editData.nic}
+                                    onChange={(e) => setEditData({...editData, nic: e.target.value})}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Column 2: Academic & Subjects */}
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
+                                        <Calendar className="w-3 h-3 text-emerald-500" /> A/L Year
+                                    </label>
                                     <Input 
-                                        className="h-9 text-sm border-slate-200 font-bold"
+                                        type="number"
+                                        className="h-10 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                                         value={editData.alYear}
                                         onChange={(e) => setEditData({...editData, alYear: e.target.value})}
                                     />
                                 </div>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Educational Institute</label>
-                                <Input 
-                                    className="h-9 text-sm border-slate-200 font-bold"
-                                    value={editData.school}
-                                    onChange={(e) => setEditData({...editData, school: e.target.value})}
-                                />
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
+                                        <BookOpen className="w-3 h-3 text-emerald-500" /> School
+                                    </label>
+                                    <Input 
+                                        className="h-10 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20"
+                                        value={editData.school}
+                                        onChange={(e) => setEditData({...editData, school: e.target.value})}
+                                    />
+                                </div>
                             </div>
 
                             {/* Subjects Section */}
-                            <div className="space-y-4 pt-4 border-t border-slate-100">
+                            <div className="space-y-4 pt-24 border-t border-slate-100">
                                 <div className="flex items-center justify-between">
-                                    <h4 className="text-xs font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+                                    <h4 className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] flex items-center gap-2">
                                         <BookOpen className="w-4 h-4 text-emerald-600" /> Academic Enrolments
                                     </h4>
                                     <Button 
@@ -499,24 +477,45 @@ export default function StudentsPage() {
                                     </div>
                                 )}
 
-                                <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {selectedStudent?.selectedSubjects?.map((sub, idx) => (
-                                        <div key={idx} className="bg-white border border-slate-100 p-3 rounded-xl flex justify-between items-center group shadow-sm hover:border-emerald-200 transition-all">
-                                            <div className="space-y-0.5">
-                                                <div className="text-xs font-black uppercase text-slate-800 tracking-tight">{sub.subjectName}</div>
-                                                <div className="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-1">
-                                                    <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                                                    Faculty: <span className="text-emerald-700">{sub.teacherName || 'Master Faculty'}</span>
-                                                </div>
+                                <div className="grid grid-cols-1 gap-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {Object.values(selectedStudent?.selectedSubjects?.reduce((acc, sub) => {
+                                        const key = `${sub.subjectId}-${sub.subjectName}`;
+                                        if (!acc[key]) {
+                                            acc[key] = { subjectName: sub.subjectName, enrollments: [] };
+                                        }
+                                        acc[key].enrollments.push(sub);
+                                        return acc;
+                                    }, {}) || {}).map((group, gIdx) => (
+                                        <div key={gIdx} className="bg-slate-50/50 border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
+                                            <div className="bg-slate-100/50 px-3 py-1.5 border-b border-slate-100 flex items-center gap-2">
+                                                <BookOpen className="w-3 h-3 text-slate-400" />
+                                                <div className="text-[9px] font-black uppercase text-slate-600 tracking-widest">{group.subjectName}</div>
                                             </div>
-                                            <Button 
-                                                variant="ghost" 
-                                                size="icon" 
-                                                className="h-7 w-7 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg group-hover:scale-110 transition-transform"
-                                                onClick={() => handleRemoveSubject(sub.subjectId)}
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </Button>
+                                            <div className="p-2 space-y-1.5">
+                                                {group.enrollments.map((sub, sIdx) => (
+                                                    <div key={sIdx} className="bg-white border border-slate-100 p-2 px-3 rounded-xl flex justify-between items-center group/card hover:border-emerald-200 transition-all duration-300">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                                                                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                                                            </div>
+                                                            <div className="space-y-0 text-left">
+                                                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none block">Assigned Faculty</span>
+                                                                <span className="text-[11px] font-black text-emerald-700 uppercase italic leading-tight">
+                                                                    {sub.teacherName || 'Master Faculty'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="icon" 
+                                                            className="h-7 w-7 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded-lg group-hover/card:scale-105 transition-transform"
+                                                            onClick={() => handleRemoveSubject(sub.subjectId, sub.teacherId)}
+                                                        >
+                                                            <X className="w-3 h-3" />
+                                                        </Button>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -524,19 +523,20 @@ export default function StudentsPage() {
                         </div>
                     </div>
 
-                    <DialogFooter className="border-t border-slate-100 pt-6">
+                    <DialogFooter className="pt-4 border-t border-slate-50">
                         <Button 
                             variant="ghost" 
-                            className="font-black text-[10px] uppercase tracking-widest text-slate-400"
+                            type="button"
                             onClick={() => setIsEditDialogOpen(false)}
+                            className="text-slate-400 hover:text-slate-600 font-bold"
                         >
-                            Abort Update
+                            Cancel
                         </Button>
                         <Button 
-                            className="bg-slate-900 hover:bg-emerald-600 font-black text-[10px] uppercase tracking-widest px-8 shadow-lg transition-all"
+                            className="bg-emerald-600 hover:bg-emerald-700 font-bold px-8"
                             onClick={handleUpdate}
                         >
-                            Save Identity Parameters
+                            Update Student
                         </Button>
                     </DialogFooter>
                 </DialogContent>

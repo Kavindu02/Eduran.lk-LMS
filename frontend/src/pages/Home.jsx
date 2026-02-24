@@ -32,7 +32,9 @@ export default function Home() {
   const heroImages = [
     '/hero.jpg',
     '/male-scientist-carefully-studies-his-data.jpg',
+    '/heroimage.jpg',
     '/group-friends-planning-trip-cafe.jpg',
+    
   ];
 
   // Auto-advance the hero image every 4 seconds

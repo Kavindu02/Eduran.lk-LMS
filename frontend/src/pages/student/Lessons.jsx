@@ -38,12 +38,9 @@ export default function StudentLessons() {
                     // Sync the global user state with latest data (batchId, role, etc.)
                     updateCurrentUser(data);
                     
-                    // Group subjects by ID (ONLY those that are PAID)
+                    // Group subjects by ID
                     const grouped = {};
                     (data.selectedSubjects || []).forEach(item => {
-                        // Skip if not paid
-                        if (item.paymentStatus !== 'paid') return;
-                        
                         const sid = item.subjectId;
                         if (!grouped[sid]) {
                             grouped[sid] = {
@@ -53,10 +50,15 @@ export default function StudentLessons() {
                             };
                         }
                         if (item.teacherId) {
-                            grouped[sid].teachers.push({
-                                id: item.teacherId,
-                                name: item.teacherName
-                            });
+                            // Avoid adding duplicate teachers if they somehow appear
+                            const teacherExists = grouped[sid].teachers.some(t => String(t.id) === String(item.teacherId));
+                            if (!teacherExists) {
+                                grouped[sid].teachers.push({
+                                    id: item.teacherId,
+                                    name: item.teacherName,
+                                    paymentStatus: item.paymentStatus
+                                });
+                            }
                         }
                     });
 
@@ -101,16 +103,23 @@ export default function StudentLessons() {
                 if (res.ok) {
                     const data = await res.json();
                     
-                    let filteredData = data;
+                    const currentSub = userSubjects.find(s => String(s.id) === String(selectedSubjectId));
+                    const paidTeacherIds = (currentSub?.teachers || [])
+                        .filter(t => t.paymentStatus === 'paid')
+                        .map(t => String(t.id));
                     
-                    // If "all" is selected, we must ensure we only show videos from teachers the student is REGISTERED with.
+                    let filteredData = [];
+                    
                     if (isAllTeachers) {
-                        const currentSub = userSubjects.find(s => String(s.id) === String(selectedSubjectId));
-                        const registeredTeacherIds = (currentSub?.teachers || []).map(t => String(t.id));
-                        
-                        filteredData = data.filter(v => {
-                            return v.teacherId && registeredTeacherIds.includes(String(v.teacherId));
-                        });
+                        filteredData = data.filter(v => v.teacherId && paidTeacherIds.includes(String(v.teacherId)));
+                    } else {
+                        // If specific teacher is selected, check if THEY are paid
+                        const isSelectedTeacherPaid = (currentSub?.teachers || []).some(t => String(t.id) === String(selectedTeacherId) && t.paymentStatus === 'paid');
+                        if (isSelectedTeacherPaid) {
+                            filteredData = data;
+                        } else {
+                            filteredData = []; // No videos if not paid
+                        }
                     }
                     
                     setVideos(filteredData);
@@ -247,7 +256,15 @@ export default function StudentLessons() {
                                     <SelectItem value="all" className="rounded-xl font-bold py-3">ALL REGISTERED TEACHERS</SelectItem>
                                     {(userSubjects.find(s => String(s.id) === String(selectedSubjectId))?.teachers || []).map(t => (
                                         <SelectItem key={t.id} value={String(t.id)} className="rounded-xl font-bold py-3 uppercase">
-                                            {t.name}
+                                            <div className="flex items-center justify-between w-full">
+                                                <span>{t.name}</span>
+                                                {t.paymentStatus !== 'paid' && (
+                                                    <div className="ml-2 bg-red-50 text-red-500 text-[8px] px-2 py-0.5 rounded-full border border-red-100 flex items-center gap-1">
+                                                        <svg className="w-2 h-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m0 0v2m0-2h2m-2 0H10m4-11a4 4 0 11-8 0 4 4 0 018 0z" /><path d="M8 11V7a4 4 0 118 0v4M5 11h14a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2z" /></svg>
+                                                        PENDING
+                                                    </div>
+                                                )}
+                                            </div>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -350,12 +367,59 @@ export default function StudentLessons() {
                             })}
                         </div>
                     ) : (
-                        <div className="bg-white border-2 border-dashed border-slate-100 rounded-[3rem] py-32 text-center shadow-inner">
-                            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <VideoIcon className="w-8 h-8 text-slate-200" />
-                            </div>
-                            <p className="text-slate-400 font-black uppercase tracking-[0.2em] text-[11px]">No content available</p>
-                            <p className="text-slate-300 text-[10px] font-bold uppercase mt-2 tracking-widest">Select a different teacher or check back later</p>
+                        <div className="bg-white border-2 border-dashed border-slate-100 rounded-[3rem] py-32 text-center shadow-inner relative overflow-hidden group">
+                            {/* Check if payment is pending */}
+                            {(() => {
+                                const currentSub = userSubjects.find(s => String(s.id) === String(selectedSubjectId));
+                                const isAllTeachers = !selectedTeacherId || selectedTeacherId === 'all';
+                                
+                                let isPaymentPending = false;
+                                let pendingReason = "";
+                                
+                                if (selectedSubjectId) {
+                                    if (isAllTeachers) {
+                                        const hasAnyPaid = (currentSub?.teachers || []).some(t => t.paymentStatus === 'paid');
+                                        if (!hasAnyPaid && (currentSub?.teachers || []).length > 0) {
+                                            isPaymentPending = true;
+                                            pendingReason = "No active subscriptions found for this subject.";
+                                        }
+                                    } else {
+                                        const teacher = (currentSub?.teachers || []).find(t => String(t.id) === String(selectedTeacherId));
+                                        if (teacher && teacher.paymentStatus !== 'paid') {
+                                            isPaymentPending = true;
+                                            pendingReason = `Payment for ${teacher.name.toUpperCase()}'s lessons is currently pending.`;
+                                        }
+                                    }
+                                }
+
+                                if (isPaymentPending) {
+                                    return (
+                                        <div className="relative z-10 animate-in fade-in zoom-in duration-500">
+                                            <div className="w-24 h-24 bg-red-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-xl shadow-red-500/10 group-hover:scale-110 transition-transform">
+                                                <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m0 0v2m0-2h2m-2 0H10m4-11a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 11V7a4 4 0 118 0v4M5 11h14a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2z" />
+                                                </svg>
+                                            </div>
+                                            <h3 className="text-lg font-black text-slate-800 uppercase tracking-tighter mb-2 italic">ACCESS RESTRICTED</h3>
+                                            <p className="text-red-500 font-black uppercase tracking-[0.2em] text-[10px] mb-4">{pendingReason}</p>
+                                            <p className="text-slate-400 text-[11px] font-bold uppercase max-w-sm mx-auto leading-relaxed">
+                                                Once your payment is verified by the administration, your lessons will appear here automatically.
+                                            </p>
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <div className="relative z-10">
+                                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                            <VideoIcon className="w-8 h-8 text-slate-200" />
+                                        </div>
+                                        <p className="text-slate-400 font-black uppercase tracking-[0.2em] text-[11px]">No content available</p>
+                                        <p className="text-slate-300 text-[10px] font-bold uppercase mt-2 tracking-widest">Select a different teacher or check back later</p>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     )}
                 </div>

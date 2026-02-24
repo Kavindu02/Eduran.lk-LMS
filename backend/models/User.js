@@ -76,44 +76,54 @@ class User {
 
     // Related to user subjects
     static async addSubject(userId, subjectId, teacherId = null, paymentStatus = 'pending') {
-        // Ensure teacherId = null if empty string
-        const tId = (teacherId === '' || teacherId === undefined) ? null : teacherId;
+        const tId = (teacherId === '' || teacherId === undefined || teacherId === null) ? null : teacherId;
         
         try {
             console.log(`Executing addSubject query for user ${userId}, subject ${subjectId}, teacher ${tId}`);
-            // Check if user already has this subject
-            const [existing] = await db.execute(
-                'SELECT * FROM user_subjects WHERE user_id = ? AND subject_id = ?',
-                [userId, subjectId]
-            );
+            
+            // Explicit check for existing matching enrollment to avoid duplicate primary key errors or logic issues
+            let existingQuery = 'SELECT id FROM user_subjects WHERE user_id = ? AND subject_id = ?';
+            let params = [userId, subjectId];
+
+            if (tId) {
+                existingQuery += ' AND teacher_id = ?';
+                params.push(tId);
+            } else {
+                existingQuery += ' AND teacher_id IS NULL';
+            }
+
+            const [existing] = await db.execute(existingQuery, params);
             
             if (existing.length > 0) {
-                // Update existing subject link
-                const [result] = await db.execute(
-                    'UPDATE user_subjects SET teacher_id = ? WHERE user_id = ? AND subject_id = ?',
-                    [tId, userId, subjectId]
-                );
-                return result;
-            } else {
-                // Insert new subject link
-                const [result] = await db.execute(
-                    'INSERT INTO user_subjects (user_id, subject_id, teacher_id, payment_status) VALUES (?, ?, ?, ?)',
-                    [userId, subjectId, tId, paymentStatus]
-                );
-                return result;
+                console.log('Enrollment already exists, skipping insert.');
+                return { message: 'Already exists' };
             }
+
+            // Insert new subject link - this will now allow multiple rows for same subject if teacher is different
+            const [result] = await db.execute(
+                'INSERT INTO user_subjects (user_id, subject_id, teacher_id, payment_status) VALUES (?, ?, ?, ?)',
+                [userId, subjectId, tId, paymentStatus]
+            );
+            return result;
         } catch (e) {
             console.error('DATABASE ERROR in User.addSubject:', e.message);
             throw e;
         }
     }
 
-    static async removeSubject(userId, subjectId) {
+    static async removeSubject(userId, subjectId, teacherId = null) {
         try {
-            const [result] = await db.execute(
-                'DELETE FROM user_subjects WHERE user_id = ? AND subject_id = ?',
-                [userId, subjectId]
-            );
+            let query = 'DELETE FROM user_subjects WHERE user_id = ? AND subject_id = ?';
+            let params = [userId, subjectId];
+
+            if (teacherId) {
+                query += ' AND teacher_id = ?';
+                params.push(teacherId);
+            } else {
+                query += ' AND teacher_id IS NULL';
+            }
+
+            const [result] = await db.execute(query, params);
             return result;
         } catch (e) {
             console.error('DATABASE ERROR in User.removeSubject:', e.message);

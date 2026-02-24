@@ -36,6 +36,7 @@ export default function VideosPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingVideo, setEditingVideo] = useState(null);
     const [selectedBatchId, setSelectedBatchId] = useState('all');
+    const [selectedTeacherId, setSelectedTeacherId] = useState('all');
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -154,15 +155,15 @@ export default function VideosPage() {
         setFormData({ title: '', description: '', youtubeUrl: '', subjectId: '', batchId: '', teacherId: '', duration: '' });
     };
 
-    const filteredVideosByBatch = selectedBatchId === 'all' 
-        ? videos 
-        : videos.filter(v => v.batchId === selectedBatchId);
+    const filteredVideos = videos.filter(v => {
+        const matchesBatch = selectedBatchId === 'all' || v.batchId === selectedBatchId;
+        const matchesTeacher = selectedTeacherId === 'all' || v.teacherId === String(selectedTeacherId);
+        const matchesSearch = v.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            v.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            v.subjectName?.toLowerCase().includes(searchTerm.toLowerCase());
         
-    const filteredVideos = filteredVideosByBatch.filter(v => 
-        v.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        v.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        v.subjectName?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+        return matchesBatch && matchesTeacher && matchesSearch;
+    });
 
     const getThumbnail = (url) => {
         if (!url) return null;
@@ -283,21 +284,10 @@ export default function VideosPage() {
                                         />
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
-                                                <Clock className="w-3 h-3 text-emerald-500" /> Duration (HH:MM)
-                                            </label>
-                                            <Input 
-                                                value={formData.duration} 
-                                                onChange={(e) => setFormData({ ...formData, duration: e.target.value })} 
-                                                placeholder="e.g. 01:20" 
-                                                className="border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20"
-                                            />
-                                        </div>
-                                        <div className="space-y-4 pt-4">
-                                            <p className="text-[10px] text-slate-400 leading-tight">Thumbnail will be generated <span className="text-emerald-500 font-bold uppercase">automatically</span> based on the YouTube ID.</p>
-                                        </div>
+                                    <div className="space-y-1 pt-2">
+                                        <p className="text-[10px] text-slate-400 font-bold leading-tight uppercase tracking-wider">
+                                            <span className="text-emerald-500">Notice:</span> Thumbnail will be generated automatically based on the YouTube ID.
+                                        </p>
                                     </div>
 
                                     <DialogFooter className="pt-4 border-t border-slate-50">
@@ -319,14 +309,35 @@ export default function VideosPage() {
                         <Filter className="w-3.5 h-3.5 text-emerald-600" />
                         <select 
                             value={selectedBatchId} 
-                            onChange={(e) => setSelectedBatchId(e.target.value)}
+                            onChange={(e) => {
+                                setSelectedBatchId(e.target.value);
+                                setSelectedTeacherId('all'); // Reset teacher filter when batch changes
+                            }}
                             className="bg-transparent text-sm font-bold text-slate-700 w-full outline-none"
                         >
                             <option value="all">All Batches</option>
                             {batches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                         </select>
                     </div>
-                    <Badge variant="outline" className="h-9 px-4 rounded-md bg-white border-slate-200 text-emerald-800 text-xs font-black uppercase hidden lg:flex items-center gap-2 shadow-sm">
+
+                    <div className="bg-white border border-slate-200 px-3 py-1 rounded-md flex items-center gap-2 h-9 w-full md:w-64 shadow-sm">
+                        <User className="w-3.5 h-3.5 text-emerald-600" />
+                        <select 
+                            value={selectedTeacherId} 
+                            onChange={(e) => setSelectedTeacherId(e.target.value)}
+                            className="bg-transparent text-sm font-bold text-slate-700 w-full outline-none"
+                        >
+                            <option value="all">All Faculty</option>
+                            {teachers
+                                .filter(t => selectedBatchId === 'all' || t.batchId === selectedBatchId)
+                                .map(t => (
+                                    <option key={t.id} value={t.id}>{t.name} ({t.subjectName})</option>
+                                ))
+                            }
+                        </select>
+                    </div>
+
+                    <Badge variant="outline" className="h-9 px-4 rounded-md bg-white border-slate-200 text-emerald-800 text-xs font-black uppercase hidden lg:flex items-center gap-2 shadow-sm ml-auto">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         {videos.length} Lectures Total
                     </Badge>
@@ -343,7 +354,7 @@ export default function VideosPage() {
                              </div>
                              <h3 className="text-xl font-black uppercase italic tracking-tighter text-slate-800">No sessions indexed</h3>
                              <p className="text-slate-500 max-w-xs mx-auto text-sm mt-2">Adjust your filters or synchronize with the video hosting repository.</p>
-                             <Button variant="ghost" className="mt-4 text-emerald-600 font-bold" onClick={() => { setSearchTerm(''); setSelectedBatchId('all'); }}>Reset Filter Registry</Button>
+                             <Button variant="ghost" className="mt-4 text-emerald-600 font-bold" onClick={() => { setSearchTerm(''); setSelectedBatchId('all'); setSelectedTeacherId('all'); }}>Reset Filter Registry</Button>
                         </div>
                     ) : (
                         filteredVideos.map(video => (

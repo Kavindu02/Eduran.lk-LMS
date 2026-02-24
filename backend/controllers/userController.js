@@ -188,11 +188,11 @@ exports.addSubjectToStudent = async (req, res) => {
 
 exports.removeSubjectFromStudent = async (req, res) => {
     try {
-        const { userId, subjectId } = req.body;
+        const { userId, subjectId, teacherId } = req.body;
         if (!userId || !subjectId) {
             return res.status(400).json({ error: 'User ID and Subject ID are required' });
         }
-        await User.removeSubject(userId, subjectId);
+        await User.removeSubject(userId, subjectId, teacherId);
         res.json({ message: 'Subject removed successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -13,7 +13,10 @@ export default function StudentDashboard() {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            if (!user?.id) return;
+            if (!user?.id) {
+                // Keep loading true but don't try to fetch yet
+                return;
+            }
             try {
                 const res = await fetch(`${API_URL}/users/profile?id=${user.id}`);
                 if (res.ok) {

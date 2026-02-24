@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,10 @@ export default function Home() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [currentImage, setCurrentImage] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const progressCircleRef = useRef(null);
+
+  // Constants for the circular progress (based on r=260)
+  const CIRCUMFERENCE = 2 * Math.PI * 260;
 
   // Force logout on home hit to clear stuck sessions
   useEffect(() => {
@@ -34,37 +37,35 @@ export default function Home() {
     '/male-scientist-carefully-studies-his-data.jpg',
     '/heroimage.jpg',
     '/group-friends-planning-trip-cafe.jpg',
-    
   ];
 
-  // Auto-advance the hero image every 4 seconds
+  // Robust animation loop using ref to avoid React render cycles for progress
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentImage((curr) => (curr + 1) % heroImages.length);
-    }, 4000);
-
-    return () => clearTimeout(timer);
-  }, [currentImage, heroImages.length]);
-
-  // Smoothly animate the progress ring for each image cycle
-  useEffect(() => {
-    setProgress(0);
-    let frameId;
-    const start = performance.now();
     const duration = 4000;
+    const startTime = performance.now();
+    let frameId;
 
     const tick = (now) => {
-      const elapsed = now - start;
+      const elapsed = now - startTime;
       const pct = Math.min((elapsed / duration) * 100, 100);
-      setProgress(pct);
-      if (pct < 100) {
+
+      // Update the circle's SVG attribute DIRECTLY for max performance (60fps)
+      if (progressCircleRef.current) {
+        const offset = CIRCUMFERENCE * (1 - pct / 100);
+        progressCircleRef.current.style.strokeDashoffset = offset;
+      }
+
+      if (pct >= 100) {
+        // Advance to next image only when cycle finishes
+        setCurrentImage((curr) => (curr + 1) % heroImages.length);
+      } else {
         frameId = requestAnimationFrame(tick);
       }
     };
 
     frameId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frameId);
-  }, [currentImage]);
+  }, [currentImage, heroImages.length, CIRCUMFERENCE]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -132,11 +133,18 @@ export default function Home() {
         </div>
 
         {/* Background Pattern Elements (Similar to the image dots/symbols) */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none select-none z-0">
-          <div className="grid grid-cols-12 gap-10 p-10 rotate-12 scale-150">
-            {Array.from({ length: 48 }).map((_, i) => (
-              <div key={i} className="text-white text-2xl font-serif">
-                {['+', '×', '∑', '?', '!', '}', '{'][i % 7]}
+        <div className="absolute inset-x-0 inset-y-0 opacity-[0.08] pointer-events-none select-none z-0 overflow-hidden">
+          <div className="grid grid-cols-6 md:grid-cols-10 lg:grid-cols-12 gap-12 p-5 rotate-12 scale-[1.8]">
+            {Array.from({ length: 120 }).map((_, i) => (
+              <div 
+                key={i} 
+                className="text-white text-3xl font-serif animate-floating"
+                style={{ 
+                  animationDelay: `${(i % 8) * 1.5}s`,
+                  animationDuration: `${10 + (i % 5) * 2}s`
+                }}
+              >
+                {['+', '×', '∑', '?', '!', '}', '{', 'π', 'θ', 'λ'][i % 10]}
               </div>
             ))}
           </div>
@@ -152,7 +160,7 @@ export default function Home() {
             {/* Left Content: Advanced Modern Typography & Animations */}
             <div className="space-y-12 pt-0 z-20 lg:-ml-12">
               {/* Advanced Text with Word-by-Word Animation Style */}
-              <div className="space-y-4 -mt-16">
+              <div className="space-y-4 -mt-44">
                 <h1 className="text-7xl md:text-[110px] font-black leading-[0.98] tracking-tighter text-white uppercase drop-shadow-2xl">
                   <div className="overflow-hidden">
                     <span className="block animate-slideInUp" style={{ animationDelay: '0.1s' }}>WE CAN</span>
@@ -212,16 +220,16 @@ export default function Home() {
                       fill="none"
                     />
                     <circle
+                      ref={progressCircleRef}
                       cx="275"
                       cy="275"
                       r="260"
                       stroke="#10b981"
                       strokeWidth="6"
-                      strokeDasharray={1 * Math.PI * 160}
-                      strokeDashoffset={(1 * Math.PI * 160) * (1 - progress / 100)}
+                      strokeDasharray={CIRCUMFERENCE}
+                      strokeDashoffset={CIRCUMFERENCE}
                       strokeLinecap="round"
                       fill="none"
-                      style={{ transition: 'stroke-dashoffset 0.08s linear' }}
                     />
                   </svg>
 
@@ -257,7 +265,7 @@ export default function Home() {
                       {heroImages.map((_, i) => (
                         <button 
                           key={i} 
-                          onClick={() => { setCurrentImage(i); setProgress(0); }}
+                          onClick={() => setCurrentImage(i)}
                           className={`h-2.5 rounded-full transition-all duration-500 ${currentImage === i ? 'w-10 bg-emerald-500' : 'w-2.5 bg-white/20 hover:bg-white/40'}`}
                         />
                       ))}
@@ -277,13 +285,13 @@ export default function Home() {
               <div className="absolute bottom-[20%] -right-12 flex flex-col gap-6 z-40 items-end">
                 <div className="flex gap-4">
                   <button 
-                    onClick={() => { setCurrentImage((prev) => (prev - 1 + heroImages.length) % heroImages.length); setProgress(0); }}
+                    onClick={() => setCurrentImage((prev) => (prev - 1 + heroImages.length) % heroImages.length)}
                     className="w-14 h-14 rounded-2xl border border-white/10 bg-black/40 text-white flex items-center justify-center backdrop-blur-xl hover:bg-emerald-600 hover:border-emerald-500 transition-all shadow-2xl active:scale-90"
                   >
                     <ChevronLeft className="w-7 h-7" />
                   </button>
                   <button 
-                    onClick={() => { setCurrentImage((prev) => (prev + 1) % heroImages.length); setProgress(0); }}
+                    onClick={() => setCurrentImage((prev) => (prev + 1) % heroImages.length)}
                     className="w-14 h-14 rounded-2xl border border-white/10 bg-black/40 text-white flex items-center justify-center backdrop-blur-xl hover:bg-emerald-600 hover:border-emerald-500 transition-all shadow-2xl active:scale-90"
                   >
                     <ChevronRight className="w-7 h-7" />

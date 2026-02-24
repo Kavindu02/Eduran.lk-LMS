@@ -75,11 +75,18 @@ export default function LoginPage() {
                 </div>
                 
                 {/* Floating Math/Edu Symbols */}
-                <div className="absolute inset-0 opacity-5">
-                    <div className="grid grid-cols-8 gap-10 p-10 rotate-12 scale-150">
-                        {Array.from({ length: 24 }).map((_, i) => (
-                            <div key={i} className="text-white text-3xl font-serif">
-                                {['+', '∑', '?', '!', '{', '}', '×'][i % 7]}
+                <div className="absolute inset-0 opacity-[0.06] pointer-events-none select-none z-0 overflow-hidden">
+                    <div className="grid grid-cols-6 md:grid-cols-10 lg:grid-cols-12 gap-12 p-5 rotate-12 scale-[1.8]">
+                        {Array.from({ length: 120 }).map((_, i) => (
+                            <div 
+                                key={i} 
+                                className="text-white text-3xl font-serif animate-floating"
+                                style={{ 
+                                    animationDelay: `${(i % 8) * 1.5}s`,
+                                    animationDuration: `${10 + (i % 5) * 2}s`
+                                }}
+                            >
+                                {['+', '∑', '?', '!', '{', '}', '×', 'π', 'θ', 'λ'][i % 10]}
                             </div>
                         ))}
                     </div>

@@ -11,49 +11,118 @@ class Video {
     }
 
     static async findAll() {
-        const [rows] = await db.execute('SELECT * FROM videos ORDER BY createdAt DESC');
+        const [rows] = await db.execute(`
+            SELECT 
+                v.*, 
+                s.name as subjectName, 
+                b.name as batchName, 
+                t.name as teacherName
+            FROM videos v
+            LEFT JOIN subjects s ON v.subjectId = s.id
+            LEFT JOIN batches b ON v.batchId = b.id
+            LEFT JOIN teachers t ON v.teacherId = t.id
+            ORDER BY v.createdAt DESC
+        `);
         return rows;
     }
 
     static async findById(id) {
-        const [rows] = await db.execute('SELECT * FROM videos WHERE id = ?', [id]);
+        const [rows] = await db.execute(`
+            SELECT 
+                v.*, 
+                s.name as subjectName, 
+                b.name as batchName, 
+                t.name as teacherName
+            FROM videos v
+            LEFT JOIN subjects s ON v.subjectId = s.id
+            LEFT JOIN batches b ON v.batchId = b.id
+            LEFT JOIN teachers t ON v.teacherId = t.id
+            WHERE v.id = ?
+        `, [id]);
         return rows[0];
     }
 
     static async findByBatch(batchId) {
-        const [rows] = await db.execute('SELECT * FROM videos WHERE batchId = ?', [batchId]);
+        const [rows] = await db.execute(`
+            SELECT 
+                v.*, 
+                s.name as subjectName, 
+                b.name as batchName, 
+                t.name as teacherName
+            FROM videos v
+            LEFT JOIN subjects s ON v.subjectId = s.id
+            LEFT JOIN batches b ON v.batchId = b.id
+            LEFT JOIN teachers t ON v.teacherId = t.id
+            WHERE v.batchId = ?
+            ORDER BY v.createdAt DESC
+        `, [batchId]);
         return rows;
     }
 
     static async findBySubject(subjectId) {
-        const [rows] = await db.execute('SELECT * FROM videos WHERE subjectId = ?', [subjectId]);
+        const [rows] = await db.execute(`
+            SELECT 
+                v.*, 
+                s.name as subjectName, 
+                b.name as batchName, 
+                t.name as teacherName
+            FROM videos v
+            LEFT JOIN subjects s ON v.subjectId = s.id
+            LEFT JOIN batches b ON v.batchId = b.id
+            LEFT JOIN teachers t ON v.teacherId = t.id
+            WHERE v.subjectId = ?
+            ORDER BY v.createdAt DESC
+        `, [subjectId]);
         return rows;
     }
 
     static async findByFilters({ subjectId, batchId, teacherId }) {
-        let query = 'SELECT * FROM videos WHERE 1=1';
+        let query = `
+            SELECT 
+                v.*, 
+                s.name as subjectName, 
+                b.name as batchName, 
+                t.name as teacherName
+            FROM videos v
+            LEFT JOIN subjects s ON v.subjectId = s.id
+            LEFT JOIN batches b ON v.batchId = b.id
+            LEFT JOIN teachers t ON v.teacherId = t.id
+            WHERE 1=1
+        `;
         const params = [];
 
         if (subjectId) {
-            query += ' AND subjectId = ?';
+            query += ' AND v.subjectId = ?';
             params.push(subjectId);
         }
         if (batchId) {
-            query += ' AND batchId = ?';
+            query += ' AND v.batchId = ?';
             params.push(batchId);
         }
         if (teacherId) {
-            query += ' AND teacherId = ?';
+            query += ' AND v.teacherId = ?';
             params.push(teacherId);
         }
 
-        query += ' ORDER BY createdAt DESC';
+        query += ' ORDER BY v.createdAt DESC';
         const [rows] = await db.execute(query, params);
         return rows;
     }
 
     static async findBySubjectAndBatch(subjectId, batchId) {
-        const [rows] = await db.execute('SELECT * FROM videos WHERE subjectId = ? AND batchId = ?', [subjectId, batchId]);
+        const [rows] = await db.execute(`
+            SELECT 
+                v.*, 
+                s.name as subjectName, 
+                b.name as batchName, 
+                t.name as teacherName
+            FROM videos v
+            LEFT JOIN subjects s ON v.subjectId = s.id
+            LEFT JOIN batches b ON v.batchId = b.id
+            LEFT JOIN teachers t ON v.teacherId = t.id
+            WHERE v.subjectId = ? AND v.batchId = ?
+            ORDER BY v.createdAt DESC
+        `, [subjectId, batchId]);
         return rows;
     }
 

@@ -130,7 +130,7 @@ export default function WatchVideoPage() {
                             <div className="space-y-3">
                                 <Button 
                                     className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest text-[9px] rounded-xl h-11"
-                                    onClick={() => navigate('/student/dashboard')}
+                                    onClick={() => navigate('/student/lessons')}
                                 >
                                     Switch Subject
                                 </Button>

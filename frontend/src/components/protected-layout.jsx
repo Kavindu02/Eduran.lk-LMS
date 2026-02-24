@@ -50,6 +50,7 @@ export default function ProtectedLayout({ children, requiredRole, title = 'Dashb
 
     const studentLinks = [
         { to: "/student/dashboard", icon: LayoutDashboard, label: "My Dashboard" },
+        { to: "/student/lessons", icon: Video, label: "Lessons" },
     ];
 
     const links = user?.role?.toLowerCase() === 'admin' ? adminLinks : studentLinks;

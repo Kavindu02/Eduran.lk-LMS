@@ -1,10 +1,34 @@
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+// Secret for additional hashing security "pepper"
+const SALT_PEPPER = process.env.JWT_SECRET || 'fallback_secret';
 
 exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await User.findByEmail(email);
-        if (!user || user.password !== password) {
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        // Standard bcrypt check with optional pepper fallback
+        let isMatch = false;
+        if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$')) {
+            // New secure way: Hashing with salt-pepper
+            isMatch = await bcrypt.compare(password + SALT_PEPPER, user.password);
+            
+            // Re-check without pepper if it fails, to support users created between salt additions
+            if (!isMatch) {
+                isMatch = await bcrypt.compare(password, user.password);
+            }
+        } else {
+            // Fallback for legacy plain text passwords
+            isMatch = (user.password === password);
+        }
+
+        if (!isMatch) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
@@ -12,7 +36,12 @@ exports.login = async (req, res) => {
             return res.status(403).json({ message: 'Account is blocked. Please contact support.' });
         }
 
-        // In a real app, generate JWT here
+        // Generate JWT Token (No expiration)
+        const token = jwt.sign(
+            { id: user.id, email: user.email, role: user.role },
+            process.env.JWT_SECRET || 'fallback_secret'
+        );
+
         const userResponse = { ...user };
         delete userResponse.password; // Don't send password back
 
@@ -21,7 +50,8 @@ exports.login = async (req, res) => {
             userResponse.selectedSubjects = subjects;
         }
 
-        res.json(userResponse);
+        // Send back token + user
+        res.json({ token, user: userResponse });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -36,8 +66,20 @@ exports.register = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const newUser = { ...req.body, id: 'user_' + Date.now() };
-        console.log('Creating user in DB:', newUser.id);
+        // Encrypt the password using bcrypt SALT and our JWT_SECRET PEPPER 
+        console.log('Generating secure storage for:', req.body.email);
+        const salt = await bcrypt.genSalt(10);
+        const passwordWithPepper = req.body.password + SALT_PEPPER;
+        const hashedPassword = await bcrypt.hash(passwordWithPepper, salt);
+
+        const newUser = { 
+            ...req.body, 
+            password: hashedPassword, 
+            id: 'user_' + Date.now() 
+        };
+        
+        console.log('Hashed length:', hashedPassword.length);
+        console.log('Creating user with ID:', newUser.id);
         await User.create(newUser);
 
         // Add selected subjects if applicable
@@ -114,18 +156,57 @@ exports.deleteUser = async (req, res) => {
 exports.updateUserStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { is_blocked, payment_status } = req.body;
+        const { is_blocked, payment_status, ...otherUpdates } = req.body;
         
-        const updates = {};
+        const updates = { ...otherUpdates };
         if (is_blocked !== undefined) updates.is_blocked = is_blocked;
         if (payment_status !== undefined) updates.payment_status = payment_status;
         
         if (Object.keys(updates).length === 0) {
-            return res.status(400).json({ error: 'No status updates provided' });
+            return res.status(400).json({ error: 'No updates provided' });
         }
         
         await User.update(id, updates);
-        res.json({ message: 'User status updated successfully' });
+        res.json({ message: 'User updated successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.addSubjectToStudent = async (req, res) => {
+    try {
+        const { userId, subjectId, teacherId } = req.body;
+        if (!userId || !subjectId) {
+            return res.status(400).json({ error: 'User ID and Subject ID are required' });
+        }
+        await User.addSubject(userId, subjectId, teacherId);
+        res.json({ message: 'Subject added successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.removeSubjectFromStudent = async (req, res) => {
+    try {
+        const { userId, subjectId } = req.body;
+        if (!userId || !subjectId) {
+            return res.status(400).json({ error: 'User ID and Subject ID are required' });
+        }
+        await User.removeSubject(userId, subjectId);
+        res.json({ message: 'Subject removed successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+exports.updateSubjectStatus = async (req, res) => {
+    try {
+        const { userId, subjectId, teacherId, status } = req.body;
+        if (!userId || !subjectId || !status) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        await User.updateSubjectPayment(userId, subjectId, teacherId, status);
+        res.json({ message: 'Subject payment status updated successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

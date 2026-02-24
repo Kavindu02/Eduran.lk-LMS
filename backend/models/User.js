@@ -54,27 +54,76 @@ class User {
         return result;
     }
 
+    static async updateSubjectPayment(userId, subjectId, teacherId, status) {
+        try {
+            // High-robustness query that handles both numeric/string IDs and NULL teacher_id
+            const query = `
+                UPDATE user_subjects 
+                SET payment_status = ? 
+                WHERE user_id = ? 
+                AND subject_id = ? 
+                AND (
+                    (teacher_id IS NULL AND ? IS NULL) OR 
+                    (teacher_id = ?)
+                )`;
+            const [result] = await db.execute(query, [status, userId, subjectId, teacherId, teacherId]);
+            return result;
+        } catch (e) {
+            console.error('DATABASE ERROR in User.updateSubjectPayment:', e.message);
+            throw e;
+        }
+    }
+
     // Related to user subjects
-    static async addSubject(userId, subjectId, teacherId = null) {
+    static async addSubject(userId, subjectId, teacherId = null, paymentStatus = 'pending') {
         // Ensure teacherId = null if empty string
         const tId = (teacherId === '' || teacherId === undefined) ? null : teacherId;
         
         try {
             console.log(`Executing addSubject query for user ${userId}, subject ${subjectId}, teacher ${tId}`);
-            const [result] = await db.execute(
-                'INSERT INTO user_subjects (user_id, subject_id, teacher_id) VALUES (?, ?, ?)',
-                [userId, subjectId, tId]
+            // Check if user already has this subject
+            const [existing] = await db.execute(
+                'SELECT * FROM user_subjects WHERE user_id = ? AND subject_id = ?',
+                [userId, subjectId]
             );
-            return result;
+            
+            if (existing.length > 0) {
+                // Update existing subject link
+                const [result] = await db.execute(
+                    'UPDATE user_subjects SET teacher_id = ? WHERE user_id = ? AND subject_id = ?',
+                    [tId, userId, subjectId]
+                );
+                return result;
+            } else {
+                // Insert new subject link
+                const [result] = await db.execute(
+                    'INSERT INTO user_subjects (user_id, subject_id, teacher_id, payment_status) VALUES (?, ?, ?, ?)',
+                    [userId, subjectId, tId, paymentStatus]
+                );
+                return result;
+            }
         } catch (e) {
             console.error('DATABASE ERROR in User.addSubject:', e.message);
             throw e;
         }
     }
 
+    static async removeSubject(userId, subjectId) {
+        try {
+            const [result] = await db.execute(
+                'DELETE FROM user_subjects WHERE user_id = ? AND subject_id = ?',
+                [userId, subjectId]
+            );
+            return result;
+        } catch (e) {
+            console.error('DATABASE ERROR in User.removeSubject:', e.message);
+            throw e;
+        }
+    }
+
     static async getSubjects(userId) {
         const [rows] = await db.execute(
-            'SELECT subject_id, teacher_id FROM user_subjects WHERE user_id = ?',
+            'SELECT subject_id, teacher_id, payment_status FROM user_subjects WHERE user_id = ?',
             [userId]
         );
         return rows;
@@ -86,7 +135,8 @@ class User {
                 us.subject_id as subjectId,
                 s.name as subjectName,
                 us.teacher_id as teacherId,
-                t.name as teacherName
+                t.name as teacherName,
+                us.payment_status as paymentStatus
             FROM user_subjects us 
             LEFT JOIN subjects s ON us.subject_id = s.id
             LEFT JOIN teachers t ON us.teacher_id = t.id
@@ -112,7 +162,8 @@ class User {
                     us.subject_id as subjectId,
                     s.name as subjectName,
                     us.teacher_id as teacherId,
-                    t.name as teacherName
+                    t.name as teacherName,
+                    us.payment_status as paymentStatus
                 FROM user_subjects us 
                 LEFT JOIN subjects s ON us.subject_id = s.id
                 LEFT JOIN teachers t ON us.teacher_id = t.id

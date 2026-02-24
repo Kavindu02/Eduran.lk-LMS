@@ -26,8 +26,12 @@ export function AuthProvider({ children }) {
             const data = await response.json();
             
             if (response.ok) {
-                setCurrentUser(data);
-                setUser(data);
+                // Now handling JWT formatted response { token, user }
+                const userObj = data.user || data;
+                if (data.token) localStorage.setItem('auth_token', data.token);
+                
+                setCurrentUser(userObj);
+                setUser(userObj);
                 return { success: true };
             } else {
                 return { success: false, message: data.message || 'Login failed' };
@@ -39,6 +43,7 @@ export function AuthProvider({ children }) {
     };
 
     const logout = () => {
+        localStorage.removeItem('auth_token');
         setCurrentUser(null);
         setUser(null);
     };

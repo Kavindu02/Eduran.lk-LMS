@@ -15,6 +15,7 @@ import AdminStudents from '@/pages/admin/Students';
 import AdminAdmins from '@/pages/admin/Admins';
 import AdminPayments from '@/pages/admin/Payments';
 import StudentDashboard from '@/pages/student/Dashboard';
+import StudentLessons from '@/pages/student/Lessons';
 import StudentWatch from '@/pages/student/Watch';
 function App() {
     return (<BrowserRouter>
@@ -32,7 +33,7 @@ function App() {
                     <Route path="/admin/admins" element={<AdminAdmins />}/>
                     <Route path="/admin/payments" element={<AdminPayments />}/>
                     <Route path="/student/dashboard" element={<StudentDashboard />}/>
-                    <Route path="/student/watch/:id" element={<StudentWatch />}/>
+                    <Route path="/student/lessons" element={<StudentLessons />}/>
                 </Routes>
                 <Toaster />
             </AuthProvider>

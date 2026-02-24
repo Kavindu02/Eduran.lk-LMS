@@ -11,13 +11,24 @@ class Teacher {
     }
 
     static async findBySubject(subjectId) {
-        const [rows] = await db.execute('SELECT * FROM teachers WHERE subjectId = ?', [subjectId]);
+        const [rows] = await db.execute(`
+            SELECT t.*, s.name as subjectName, b.name as batchName, s.batchId
+            FROM teachers t
+            LEFT JOIN subjects s ON t.subjectId = s.id
+            LEFT JOIN batches b ON s.batchId = b.id
+            WHERE t.subjectId = ?
+        `, [subjectId]);
         return rows;
     }
 
     static async findAll() {
         try {
-            const [rows] = await db.execute('SELECT * FROM teachers');
+            const [rows] = await db.execute(`
+                SELECT t.*, s.name as subjectName, b.name as batchName, s.batchId
+                FROM teachers t
+                LEFT JOIN subjects s ON t.subjectId = s.id
+                LEFT JOIN batches b ON s.batchId = b.id
+            `);
             return rows;
         } catch (error) {
             console.error("DB Error in Teacher.findAll:", error);

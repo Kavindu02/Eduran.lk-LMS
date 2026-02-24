@@ -3,9 +3,15 @@ import ProtectedLayout from '@/components/protected-layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, ShieldAlert, ShieldCheck, CreditCard, Ban, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, ShieldAlert, ShieldCheck, Ban, ChevronDown, Check, Settings2, ShieldOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { 
+    Popover, 
+    PopoverContent, 
+    PopoverTrigger 
+} from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 
 export default function PaymentsPage() {
@@ -42,8 +48,7 @@ export default function PaymentsPage() {
             });
 
             if (response.ok) {
-                toast.success('Status updated successfully');
-                // Optimistically update the UI
+                toast.success('Access updated successfully');
                 setStudents(prev => prev.map(s => 
                     s.id === userId ? { ...s, ...updates } : s
                 ));
@@ -57,6 +62,40 @@ export default function PaymentsPage() {
         }
     };
 
+    const handleUpdateSubjectStatus = async (userId, subjectId, teacherId, newStatus) => {
+        setProcessingId(`${userId}-${subjectId}-${teacherId}`);
+        try {
+            const response = await fetch('/api/users/subject-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, subjectId, teacherId, status: newStatus })
+            });
+
+            if (response.ok) {
+                toast.success(`Subject access: ${newStatus.toUpperCase()}`);
+                setStudents(prev => prev.map(s => {
+                    if (s.id !== userId) return s;
+                    return {
+                        ...s,
+                        selectedSubjects: s.selectedSubjects.map(sub => {
+                            if (sub.subjectId === subjectId && sub.teacherId === teacherId) {
+                                return { ...sub, paymentStatus: newStatus };
+                            }
+                            return sub;
+                        })
+                    };
+                }));
+            } else {
+                const errorData = await response.json();
+                toast.error(errorData.error || 'Failed to update subject');
+            }
+        } catch (error) {
+            toast.error('Network error during update');
+        } finally {
+            setProcessingId(null);
+        }
+    };
+
     const filteredStudents = students.filter(s => 
         (s.firstName + ' ' + s.lastName)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.nic?.includes(searchTerm) ||
@@ -64,140 +103,177 @@ export default function PaymentsPage() {
     );
 
     return (
-        <ProtectedLayout requiredRole="admin" title="Payments & Access Registry">
+        <ProtectedLayout requiredRole="admin" title="Payments Registry">
             <div className="space-y-6 animate-fadeIn">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div className="space-y-1">
                         <h2 className="text-3xl font-black italic uppercase tracking-tighter text-slate-900">
-                            Payments & <span className="text-emerald-600">Access Control</span>
+                            Subject <span className="text-emerald-600">Access Management</span>
                         </h2>
-                        <p className="text-slate-500 text-sm font-medium">Manage student financial status and system access permissions.</p>
+                        <p className="text-slate-500 text-sm font-medium">Control student granular access per course.</p>
                     </div>
                     
-                    <div className="relative w-full md:w-80">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <div className="relative w-full md:w-96 group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                         <Input 
-                            placeholder="Search by Name, NIC or Batch..." 
-                            className="pl-10 border-slate-200 focus:ring-emerald-500 bg-white/50"
+                            placeholder="Search Name, NIC, or Batch ID..." 
+                            className="pl-11 h-12 rounded-2xl border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white shadow-sm"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
                 </div>
 
-                <Card className="border-slate-200/60 shadow-xl shadow-slate-200/20 overflow-hidden bg-white/80 backdrop-blur-md rounded-[1.5rem]">
-                    <CardContent className="p-0">
-                        <Table>
-                            <TableHeader className="bg-slate-900">
-                                <TableRow className="hover:bg-transparent border-none">
-                                    <TableHead className="font-black text-slate-400 uppercase tracking-[0.2em] text-[10px] py-5 px-6">Student Registry</TableHead>
-                                    <TableHead className="font-black text-slate-400 uppercase tracking-[0.2em] text-[10px] py-5 px-6">NIC / Batch</TableHead>
-                                    <TableHead className="font-black text-slate-400 uppercase tracking-[0.2em] text-[10px] py-5 px-6">Payment Status</TableHead>
-                                    <TableHead className="font-black text-slate-400 uppercase tracking-[0.2em] text-[10px] py-5 px-6">Access Security</TableHead>
-                                    <TableHead className="font-black text-slate-400 uppercase tracking-[0.2em] text-[10px] py-5 px-6 text-right">Actions</TableHead>
+                <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+                    <Table>
+                        <TableHeader className="bg-slate-50 border-b border-slate-100">
+                            <TableRow className="hover:bg-transparent">
+                                <TableHead className="font-black text-slate-800 uppercase tracking-widest text-[10px] py-4 px-6">Student Info</TableHead>
+                                <TableHead className="font-black text-slate-800 uppercase tracking-widest text-[10px] py-4 px-6">Identities</TableHead>
+                                <TableHead className="font-black text-slate-800 uppercase tracking-widest text-[10px] py-4 px-6 text-center">Subject Access</TableHead>
+                                <TableHead className="font-black text-slate-800 uppercase tracking-widest text-[10px] py-4 px-6 text-right">Settings</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="h-40 text-center">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <div className="w-8 h-8 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Syncing Data...</span>
+                                        </div>
+                                    </TableCell>
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {loading ? (
-                                    <TableRow>
-                                        <TableCell colSpan={5} className="h-48 text-center text-slate-400 font-bold italic uppercase tracking-widest">Hydrating student records...</TableCell>
+                            ) : filteredStudents.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="h-40 text-center">
+                                        <p className="text-sm font-bold text-slate-300 italic uppercase tracking-widest">No matching records</p>
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                filteredStudents.map((student) => (
+                                    <TableRow key={student.id} className="group hover:bg-slate-50 border-slate-50 transition-colors duration-200">
+                                        <TableCell className="py-4 px-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-lg shadow-sm transition-colors ${student.is_blocked ? 'bg-red-50 text-red-600' : 'bg-slate-900 text-white group-hover:bg-emerald-600'}`}>
+                                                    {student.firstName?.charAt(0).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <div className="font-black text-slate-900 uppercase italic text-sm tracking-tight">{student.firstName} {student.lastName}</div>
+                                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{student.email}</div>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="py-4 px-6">
+                                            <div className="space-y-1">
+                                                <div className="text-[10px] font-black text-slate-700 uppercase tracking-widest">
+                                                    NIC: {student.nic || 'N/A'}
+                                                </div>
+                                                <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-200 text-slate-400">
+                                                    {student.batchName} ({student.alYear})
+                                                </Badge>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="py-4 px-6 text-center">
+                                            {student.selectedSubjects?.length > 0 ? (
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button 
+                                                            variant="outline" 
+                                                            className="h-8 px-4 rounded-lg transition-all gap-3 border-slate-200 bg-white hover:border-emerald-500 hover:text-emerald-700 shadow-sm"
+                                                        >
+                                                            <div className={`w-2 h-2 rounded-full ${
+                                                                student.selectedSubjects.every(s => s.paymentStatus === 'paid') 
+                                                                ? 'bg-emerald-500' 
+                                                                : student.selectedSubjects.some(s => s.paymentStatus === 'paid')
+                                                                ? 'bg-amber-400'
+                                                                : 'bg-red-500'
+                                                            }`} />
+                                                            <span className="font-black text-[10px] uppercase tracking-widest">
+                                                                {student.selectedSubjects.length} SUBJECTS
+                                                            </span>
+                                                            <Settings2 className="w-3 h-3 text-slate-400" />
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-[280px] p-0 border-none shadow-xl rounded-xl bg-white overflow-hidden" side="top">
+                                                        <div className="bg-slate-900 px-4 py-3 flex items-center justify-between">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 leading-none">Access List</span>
+                                                            </div>
+                                                            <Badge className="bg-emerald-500 text-slate-900 border-none text-[9px] font-black h-5 px-2">
+                                                                {student.selectedSubjects.filter(s => s.paymentStatus === 'paid').length}/{student.selectedSubjects.length} PAID
+                                                            </Badge>
+                                                        </div>
+                                                        <div className="p-2 space-y-2 max-h-[260px] overflow-y-auto bg-slate-50/20">
+                                                            {Object.values(student.selectedSubjects.reduce((acc, sub) => {
+                                                                if (!acc[sub.subjectId]) acc[sub.subjectId] = { id: sub.subjectId, name: sub.subjectName, teachers: [] };
+                                                                acc[sub.subjectId].teachers.push(sub);
+                                                                return acc;
+                                                            }, {})).map((group) => (
+                                                                <div key={group.id} className="space-y-1">
+                                                                    <div className="px-1 flex items-center gap-1.5 mb-1">
+                                                                        <div className="w-1 h-3 bg-emerald-500 rounded-full" />
+                                                                        <span className="text-[10px] font-black uppercase italic tracking-tight text-slate-900">{group.name}</span>
+                                                                    </div>
+                                                                    <div className="space-y-1">
+                                                                        {group.teachers.map((sub) => (
+                                                                            <div key={`${student.id}-${sub.subjectId}-${sub.teacherId}`} 
+                                                                                className={`flex items-center justify-between gap-3 p-2 rounded-lg border transition-all ${
+                                                                                    sub.paymentStatus === 'paid' ? 'bg-emerald-50 border-emerald-100' : 'bg-white border-slate-100 hover:border-emerald-200'
+                                                                                }`}
+                                                                            >
+                                                                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                                                    <Checkbox 
+                                                                                        checked={sub.paymentStatus === 'paid'}
+                                                                                        onCheckedChange={(checked) => handleUpdateSubjectStatus(student.id, sub.subjectId, sub.teacherId, checked ? 'paid' : 'pending')}
+                                                                                        disabled={processingId === `${student.id}-${sub.subjectId}-${sub.teacherId}`}
+                                                                                        className="w-4 h-4 rounded-md border-2 border-slate-200"
+                                                                                    />
+                                                                                    <span className={`text-[9px] font-black uppercase tracking-tight truncate ${sub.paymentStatus === 'paid' ? 'text-emerald-700' : 'text-slate-600'}`}>
+                                                                                        {(sub.teacherName || 'N/A').replace(/PROF\.\s/i, '')}
+                                                                                    </span>
+                                                                                </div>
+                                                                                {sub.paymentStatus === 'paid' && (
+                                                                                    <div className="flex items-center gap-1 text-emerald-600 bg-emerald-500/10 px-1 py-0.5 rounded text-[7px] font-black">
+                                                                                        <Check className="w-2.5 h-2.5 stroke-[4]" /> PAID
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </PopoverContent>
+                                                </Popover>
+                                            ) : (
+                                                <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest text-slate-300 border-dashed">No Subjects</Badge>
+                                            )}
+                                        </TableCell>
+                                        <TableCell className="py-4 px-6 text-right">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Badge className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg border ${student.is_blocked ? 'bg-red-50 text-red-600 border-red-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                                                    {student.is_blocked ? 'Blocked' : 'Active'}
+                                                </Badge>
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="icon"
+                                                    disabled={processingId === student.id}
+                                                    onClick={() => handleUpdateStatus(student.id, { is_blocked: !student.is_blocked })}
+                                                    className={`h-8 w-8 rounded-lg hover:bg-slate-100 ${student.is_blocked ? 'text-emerald-600' : 'text-red-500'}`}
+                                                >
+                                                    {student.is_blocked ? <ShieldCheck className="w-4 h-4" /> : <ShieldOff className="w-4 h-4" />}
+                                                </Button>
+                                            </div>
+                                        </TableCell>
                                     </TableRow>
-                                ) : filteredStudents.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={5} className="h-48 text-center text-slate-400 font-bold italic uppercase tracking-widest">No matching records found</TableCell>
-                                    </TableRow>
-                                ) : (
-                                    filteredStudents.map((student) => (
-                                        <TableRow key={student.id} className="group hover:bg-slate-50/80 border-slate-100 transition-all duration-300">
-                                            <TableCell className="py-5 px-6">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg shadow-sm border ${student.is_blocked ? 'bg-red-50 text-red-600 border-red-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'}`}>
-                                                        {student.firstName?.charAt(0).toUpperCase()}
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-black text-slate-900 uppercase italic tracking-tight">{student.firstName} {student.lastName}</div>
-                                                        <div className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{student.email}</div>
-                                                    </div>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="py-5 px-6">
-                                                <div className="space-y-1">
-                                                    <div className="text-sm font-bold text-slate-700 font-mono tracking-tighter">{student.nic || 'NO NIC'}</div>
-                                                    <Badge variant="outline" className="bg-slate-100/50 text-[9px] font-black uppercase tracking-widest border-slate-200">
-                                                        {student.batchName} ({student.alYear})
-                                                    </Badge>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="py-5 px-6">
-                                                {student.payment_status === 'paid' ? (
-                                                    <div className="flex items-center gap-2 text-emerald-600 px-3 py-1.5 bg-emerald-50 rounded-xl w-fit border border-emerald-100">
-                                                        <CheckCircle2 className="w-4 h-4" />
-                                                        <span className="text-[10px] font-black uppercase tracking-widest">Verified Paid</span>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center gap-2 text-red-500 px-3 py-1.5 bg-red-50 rounded-xl w-fit border border-red-100">
-                                                        <XCircle className="w-4 h-4" />
-                                                        <span className="text-[10px] font-black uppercase tracking-widest">Pending</span>
-                                                    </div>
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="py-5 px-6">
-                                                {student.is_blocked ? (
-                                                    <div className="flex items-center gap-2 text-red-600">
-                                                        <ShieldAlert className="w-4 h-4" />
-                                                        <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 bg-red-100 rounded">Blocked</span>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center gap-2 text-emerald-600">
-                                                        <ShieldCheck className="w-4 h-4" />
-                                                        <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 bg-emerald-100 rounded">Access Active</span>
-                                                    </div>
-                                                )}
-                                            </TableCell>
-                                            <TableCell className="py-5 px-6 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    {/* Payment Toggle */}
-                                                    <Button 
-                                                        variant="outline" 
-                                                        size="sm"
-                                                        onClick={() => handleUpdateStatus(student.id, { 
-                                                            payment_status: student.payment_status === 'paid' ? 'unpaid' : 'paid' 
-                                                        })}
-                                                        disabled={processingId === student.id}
-                                                        className={`rounded-xl h-10 px-4 border shadow-sm transition-all duration-300 font-bold uppercase text-[10px] tracking-widest ${
-                                                            student.payment_status === 'paid' 
-                                                            ? 'hover:bg-red-50 hover:text-red-600 bg-white text-slate-600' 
-                                                            : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
-                                                        }`}
-                                                    >
-                                                        <CreditCard className="w-3 h-3 mr-2" />
-                                                        {student.payment_status === 'paid' ? 'Mark Unpaid' : 'Mark Paid'}
-                                                    </Button>
-
-                                                    {/* Block Toggle */}
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon"
-                                                        disabled={processingId === student.id}
-                                                        onClick={() => handleUpdateStatus(student.id, { is_blocked: !student.is_blocked })}
-                                                        className={`w-10 h-10 rounded-xl transition-all duration-300 border ${
-                                                            student.is_blocked 
-                                                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100' 
-                                                            : 'bg-red-50 text-red-600 border-red-100 hover:bg-red-100'
-                                                        }`}
-                                                    >
-                                                        {student.is_blocked ? <ShieldCheck className="w-5 h-5" /> : <Ban className="w-5 h-5" />}
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
                 </Card>
             </div>
         </ProtectedLayout>
     );
 }
+

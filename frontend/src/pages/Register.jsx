@@ -373,25 +373,22 @@ export default function RegisterPage() {
                             return (
                                 <div 
                                   key={`sub-row-${sid}`} 
-                                  className={`flex items-center justify-between group cursor-pointer p-3 rounded-xl transition-all border ${isSelected ? 'bg-emerald-500/10 border-emerald-500/50 outline outline-1 outline-emerald-500/30' : 'hover:bg-white/5 border-transparent'}`} 
+                                  className={`flex items-center justify-between group cursor-pointer p-4 rounded-2xl transition-all duration-300 border-2 select-none ${isSelected ? 'bg-emerald-500/20 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.1)]' : 'bg-white/5 border-white/5 hover:border-white/20 hover:bg-white/10'}`} 
                                   onClick={() => toggleSubject(sub.id)}
                                 >
-                                  <div className="flex items-center gap-4">
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isSelected ? 'bg-emerald-500 text-black' : 'bg-white/5 text-white/40'}`}>
-                                      {isSelected ? <Check className="w-5 h-5 flex-shrink-0" /> : <School className="w-4 h-4 flex-shrink-0" />}
+                                  <div className="flex items-center gap-4 flex-1">
+                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 ${isSelected ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20 rotate-[360deg]' : 'bg-white/5 text-white/40'}`}>
+                                      {isSelected ? <Check className="w-6 h-6 flex-shrink-0" /> : <School className="w-5 h-5 flex-shrink-0" />}
                                     </div>
                                     <div>
-                                      <p className="text-sm font-bold text-white uppercase leading-none font-sans">{sub.name || 'Unknown'}</p>
-                                      <p className="text-[10px] text-white/30 font-black tracking-widest uppercase mt-1 leading-none">{sub.code || '---'}</p>
+                                      <p className="text-sm md:text-md font-black text-white uppercase leading-none font-sans tracking-tight mb-1">{sub.name || 'Unknown'}</p>
+                                      <p className="text-[10px] text-emerald-500/60 font-black tracking-widest uppercase mt-1 leading-none">{sub.code || 'CODE ---'}</p>
                                     </div>
                                   </div>
-                                  <div className="ml-4 flex-shrink-0">
-                                    <Checkbox 
-                                      checked={isSelected} 
-                                      onCheckedChange={() => toggleSubject(sub.id)}
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
-                                    />
+                                  <div className="ml-4 flex-shrink-0 pointer-events-none">
+                                    <div className={`w-6 h-6 rounded-lg border-2 transition-all duration-300 flex items-center justify-center ${isSelected ? 'bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-transparent border-white/20'}`}>
+                                      {isSelected && <Check className="w-3.5 h-3.5 text-black" />}
+                                    </div>
                                   </div>
                                 </div>
                             );
@@ -429,20 +426,26 @@ export default function RegisterPage() {
                                       return (
                                         <div 
                                           key={`t-opt-${sid}-${t.id}`} 
-                                          className={`flex items-center gap-3 p-2 rounded-xl border transition-all cursor-pointer ${isChosen ? 'bg-emerald-500/10 border-emerald-500/40' : 'bg-white/5 border-transparent hover:bg-white/10'}`}
-                                          onClick={() => toggleTeacher(sid, t.id)}
+                                          className={`group flex items-center justify-between p-3 rounded-2xl border-2 transition-all duration-300 cursor-pointer select-none ${isChosen ? 'bg-emerald-500/20 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'bg-white/5 border-transparent hover:bg-white/10 hover:border-white/10'}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleTeacher(sid, t.id);
+                                          }}
                                         >
-                                          <Checkbox 
-                                            checked={isChosen} 
-                                            onCheckedChange={() => toggleTeacher(sid, t.id)}
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="border-white/20 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500"
-                                          />
-                                          <div className="flex-1 overflow-hidden">
-                                            <p className="text-[11px] font-bold text-white truncate">{t.name}</p>
-                                            <p className="text-[9px] text-white/30 font-black tracking-widest uppercase truncate">{t.qualification || 'EXPERIENCED TEACHER'}</p>
+                                          <div className="flex items-center gap-3 flex-1 overflow-hidden">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${isChosen ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'bg-white/5 text-white/40'}`}>
+                                              <User className="w-5 h-5 flex-shrink-0" />
+                                            </div>
+                                            <div className="overflow-hidden">
+                                              <p className="text-[12px] font-black text-white hover:text-emerald-500 transition-colors uppercase truncate tracking-tight">{t.name}</p>
+                                              <p className="text-[9px] text-emerald-500/40 font-black tracking-[0.2em] uppercase truncate">{t.qualification || 'LEVEL EXPERT'}</p>
+                                            </div>
                                           </div>
-                                          {isChosen && <Check className="w-3 h-3 text-emerald-500" />}
+                                          <div className="ml-3 flex-shrink-0 pointer-events-none">
+                                            <div className={`w-6 h-6 rounded-lg border-2 transition-all duration-300 flex items-center justify-center ${isChosen ? 'bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-transparent border-white/20'}`}>
+                                              {isChosen && <Check className="w-3.5 h-3.5 text-black" />}
+                                            </div>
+                                          </div>
                                         </div>
                                       );
                                     })}

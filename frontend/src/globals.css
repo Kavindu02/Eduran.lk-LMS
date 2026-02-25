@@ -308,9 +308,60 @@
 
 .animate-floating {
   animation: floating 12s ease-in-out infinite;
+  will-change: transform;
 }
 
-/* Custom Scrollbar */
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-slideInUp {
+  animation: slideInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fadeInLeft {
+  animation: fadeInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fadeInRight {
+  animation: fadeInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Base scroll optimization */
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+@keyframes scroll-x {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+.animate-scroll-x {
+  animation: scroll-x 60s linear infinite;
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.animate-scroll-x > * {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Force hardware acceleration for problematic sections */
+#about-section, #hero-section, #why-choose-section, #faculty-section {
+  contain: paint;
+  will-change: transform;
+}
+
+/* Custom Scrollbar - Minimal performance impact */
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
 }

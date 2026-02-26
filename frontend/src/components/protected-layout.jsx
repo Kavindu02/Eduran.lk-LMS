@@ -147,26 +147,24 @@ export default function ProtectedLayout({ children, requiredRole, title = 'Dashb
                 </main>
 
                 {/* Mobile Bottom Navigation */}
-                <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex items-center justify-around p-3 z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+                <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex items-center justify-center gap-1 py-3 px-1 z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] overflow-x-auto no-scrollbar">
                     {links.map((link) => (
                         <NavLink 
                             key={link.to}
                             to={link.to} 
                             className={({ isActive }) => `
-                                flex flex-col items-center gap-1 transition-all duration-200
+                                flex flex-col items-center justify-center min-w-[40px] min-h-[40px] transition-all duration-200
                                 ${isActive ? 'text-emerald-500 scale-110' : 'text-slate-400'}
                             `}
                         >
-                            <link.icon className="w-6 h-6" />
-                            <span className="text-[10px] font-bold uppercase tracking-tighter">{link.label.split(' ')[0]}</span>
+                            <link.icon className="w-5 h-5" />
                         </NavLink>
                     ))}
                     <button 
                         onClick={handleLogout}
-                        className="flex flex-col items-center gap-1 text-red-400 transition-all duration-200"
+                        className="flex flex-col items-center justify-center min-w-[40px] min-h-[40px] text-red-400 transition-all duration-200"
                     >
-                        <LogOut className="w-6 h-6" />
-                        <span className="text-[10px] font-bold uppercase tracking-tighter">Exit</span>
+                        <LogOut className="w-5 h-5" />
                     </button>
                 </nav>
             </div>

@@ -650,7 +650,7 @@ export default function Home() {
               Our Expert <span style={{ color: '#00BC7D' }}>Faculty</span> <br className="sm:hidden" /> 
               <span className="hidden sm:inline"> </span><span style={{ color: '#00BC7D' }}>&</span> Educators
             </h2>
-            <div className="w-12 lg:w-24 h-1 lg:h-2 mx-auto rounded-full" style={{ backgroundColor: '#1E6635' }} />
+            <div className="w-12 lg:w-24 h-1 lg:h-2 mx-auto rounded-full" style={{ backgroundColor: '#00BC7D' }} />
           </div>
 
           {/* Marquee/Scroll Container for Teachers - Stable Infinite Loop */}

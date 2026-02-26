@@ -246,12 +246,12 @@ export default function Home() {
         <div className="absolute top-[10%] left-[5%] w-32 h-32 rounded-full bg-emerald-400/20 blur-3xl animate-pulse" />
         <div className="absolute top-[15%] right-[40%] w-10 h-10 rounded-full bg-green-300 animate-bounce-subtle opacity-60" />
 
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10 w-full flex-grow flex items-center pt-32 lg:pt-2 pb-16 lg:pb-32">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10 w-full flex-grow flex items-center pt-10 lg:pt-2 pb-16 lg:pb-32">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-12 items-center w-full">
             
             {/* Left Content */}
-            <div className="space-y-12 pt-0 z-20 text-center lg:text-left lg:-ml-12">
-              <div className="space-y-4 -mt-20 lg:-mt-44">
+            <div className="order-2 lg:order-1 space-y-8 lg:space-y-12 pt-0 z-20 text-center lg:text-left lg:-ml-12 -mt-16 lg:mt-0">
+              <div className="space-y-4 mt-0 lg:-mt-44">
                 <h1 className="text-5xl sm:text-7xl lg:text-[110px] font-black leading-[0.9] lg:leading-[0.98] tracking-tighter text-white uppercase drop-shadow-2xl">
                   <div className="overflow-hidden">
                     <span className="block animate-slideInUp" style={{ animationDelay: '0.1s' }}>WE CAN</span>
@@ -288,13 +288,13 @@ export default function Home() {
             </div>
 
             {/* Right Side: Circular Rotator - Visible on All Screens now */}
-            <div className="relative block h-[450px] sm:h-[500px] lg:h-[650px] animate-fadeIn">
+            <div className="order-1 lg:order-2 relative block h-[380px] sm:h-[500px] lg:h-[650px] animate-fadeIn -mt-16 lg:mt-0">
               <div className="absolute -right-20 -bottom-20 w-[120%] h-[120%] pointer-events-none overflow-hidden">
                 <div className="absolute top-[20%] right-[-10%] w-[300px] lg:w-[500px] h-[300px] lg:h-[500px] bg-white opacity-5 rounded-full blur-[100px]" />
                 <div className="absolute bottom-[20%] right-[10%] w-[200px] lg:w-[300px] h-[200px] lg:h-[300px] bg-emerald-500 opacity-10 rounded-full blur-[80px]" />
               </div>
 
-              <div className="absolute top-1/2 lg:top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+              <div className="absolute top-[40%] lg:top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
                 <div className="relative group p-4 lg:p-6 flex items-center justify-center">
                   <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none scale-[1.05] sm:scale-[1.08] lg:scale-110 transform-gpu" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }} viewBox="0 0 550 550">
                     <circle cx="275" cy="275" r="260" stroke="rgba(255,255,255,0.05)" strokeWidth="2" fill="none" />
@@ -349,7 +349,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="absolute bottom-[5%] sm:bottom-[10%] lg:bottom-[20%] right-0 lg:-right-12 flex flex-col gap-6 z-40 items-end">
+              <div className="absolute bottom-[5%] sm:bottom-[10%] lg:bottom-[20%] right-0 lg:-right-12 hidden lg:flex flex-col gap-6 z-40 items-end">
                 <div className="flex gap-4">
                   <button 
                     onClick={() => setCurrentImage((prev) => (prev - 1 + heroImages.length) % heroImages.length)}

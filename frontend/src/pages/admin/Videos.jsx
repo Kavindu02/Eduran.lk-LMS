@@ -427,7 +427,7 @@ export default function VideosPage() {
                                                 onClick={() => handleDelete(video.id)} 
                                                 className="flex-1 h-8 text-red-500 hover:text-red-600 hover:bg-red-50 font-bold text-[10px] uppercase tracking-tighter gap-1.5"
                                             >
-                                                <Trash2 className="w-3 h-3" /> Archive
+                                                <Trash2 className="w-3 h-3" /> remove
                                             </Button>
                                         </div>
                                     </div>

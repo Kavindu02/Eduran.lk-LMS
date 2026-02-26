@@ -7,7 +7,20 @@ import { LogOut, Menu, LayoutDashboard, Users, BookOpen, Video, GraduationCap, L
 export default function ProtectedLayout({ children, requiredRole, title = 'Dashboard' }) {
     const navigate = useNavigate();
     const { user, logout, isLoading } = useAuth();
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth <= 768) {
+                setSidebarOpen(false);
+            } else {
+                setSidebarOpen(true);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         if (!isLoading) {
@@ -57,25 +70,25 @@ export default function ProtectedLayout({ children, requiredRole, title = 'Dashb
 
     return (
         <div className="flex h-screen bg-background overflow-hidden font-sans">
-            {/* Sidebar */}
-            <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col z-30`}>
+            {/* Sidebar - Hidden on mobile, visible on desktop */}
+            <aside className={`${sidebarOpen ? 'w-64' : 'hidden md:flex w-20'} bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col z-30`}>
                 {/* User Profile */}
-                <div className="p-4 border-b border-sidebar-border">
+                <div className={`p-3 md:p-4 border-b border-sidebar-border flex items-center ${!sidebarOpen && 'justify-center'}`}>
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 min-w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold shadow-sm">
+                        <div className="w-8 h-8 md:w-10 md:h-10 min-w-8 md:min-w-10 bg-emerald-600/20 rounded-full flex items-center justify-center text-emerald-500 font-bold shadow-sm border border-emerald-500/10">
                             {user.name?.charAt(0).toUpperCase() || 'U'}
                         </div>
                         {sidebarOpen && (
                             <div className="overflow-hidden">
-                                <p className="text-sm text-sidebar-foreground font-bold truncate leading-tight">{user.name}</p>
-                                <p className="text-[10px] text-sidebar-foreground/50 uppercase tracking-widest mt-0.5">{user.role}</p>
+                                <p className="text-sm text-sidebar-foreground font-bold truncate leading-tight uppercase tracking-tight">{user.name}</p>
+                                <p className="text-[10px] text-sidebar-foreground/40 uppercase tracking-[0.2em] mt-0.5">{user.role}</p>
                             </div>
                         )}
                     </div>
                 </div>
 
                 {/* Nav Links */}
-                <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+                <nav className="flex-1 p-2 md:p-3 space-y-1 overflow-y-auto mt-2">
                     {links.map((link) => (
                         <NavLink 
                             key={link.to}
@@ -83,54 +96,79 @@ export default function ProtectedLayout({ children, requiredRole, title = 'Dashb
                             className={({ isActive }) => `
                                 flex items-center p-2.5 rounded-xl transition-all duration-200 group
                                 ${isActive 
-                                    ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20' 
-                                    : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'}
+                                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' 
+                                    : 'text-sidebar-foreground/40 hover:bg-emerald-500/5 hover:text-emerald-500'}
                             `}
                         >
                             <link.icon className={`w-5 h-5 shrink-0 ${sidebarOpen ? 'mr-3' : 'mx-auto'}`} />
-                            {sidebarOpen && <span className="text-sm font-semibold tracking-tight">{link.label}</span>}
+                            {sidebarOpen && <span className="text-sm font-bold tracking-tight">{link.label}</span>}
                         </NavLink>
                     ))}
                 </nav>
 
                 {/* Footer / Logout */}
-                <div className="p-4 border-t border-sidebar-border">
+                <div className="p-3 md:p-4 border-t border-sidebar-border">
                     <Button 
                         variant="ghost" 
                         onClick={handleLogout}
-                        className={`w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 group transition-colors ${!sidebarOpen && 'px-0 justify-center'}`}
+                        className={`w-full justify-start text-red-500 hover:text-red-400 hover:bg-red-500/5 group transition-all duration-200 ${!sidebarOpen && 'px-0 justify-center'}`}
                     >
                         <LogOut className={`w-5 h-5 ${sidebarOpen && 'mr-3'}`} />
-                        {sidebarOpen && <span className="font-bold text-xs uppercase tracking-widest">Logout</span>}
+                        {sidebarOpen && <span className="font-bold text-[10px] uppercase tracking-[0.2em]">Logout</span>}
                     </Button>
                 </div>
             </aside>
 
             {/* Content Area */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
                 {/* Header */}
-                <header className="h-16 bg-background/80 backdrop-blur-md border-b border-border flex items-center justify-between px-6 sticky top-0 z-20">
-                    <div className="flex items-center gap-4">
+                <header className="h-16 bg-background/50 backdrop-blur-xl border-b border-border/50 flex items-center justify-between px-4 md:px-6 sticky top-0 z-20">
+                    <div className="flex items-center gap-2 md:gap-4">
                         <Button 
                             variant="ghost" 
                             size="icon" 
                             onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="text-muted-foreground"
+                            className="hidden md:inline-flex text-muted-foreground hover:bg-slate-100 transition-colors"
                         >
                             <Menu className="w-5 h-5" />
                         </Button>
-                        <h1 className="text-lg font-black text-foreground uppercase tracking-tight italic">
-                            {title}
+                        <h1 className="text-base md:text-xl font-black text-slate-800 uppercase tracking-tighter leading-none md:leading-[0.9] italic flex flex-col md:flex-row md:gap-2">
+                            <span>{title.split(' ')[0]}</span>
+                            {title.split(' ')[1] && <span className="text-emerald-500">{title.split(' ')[1]}</span>}
                         </h1>
                     </div>
                 </header>
 
                 {/* Body */}
-                <main className="flex-1 overflow-y-auto bg-slate-50/30">
-                    <div className="p-4 md:p-8 max-w-7xl mx-auto">
+                <main className="flex-1 overflow-y-auto bg-slate-50/20 scroll-smooth pb-20 md:pb-0">
+                    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
                         {children}
                     </div>
                 </main>
+
+                {/* Mobile Bottom Navigation */}
+                <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex items-center justify-around p-3 z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+                    {links.map((link) => (
+                        <NavLink 
+                            key={link.to}
+                            to={link.to} 
+                            className={({ isActive }) => `
+                                flex flex-col items-center gap-1 transition-all duration-200
+                                ${isActive ? 'text-emerald-500 scale-110' : 'text-slate-400'}
+                            `}
+                        >
+                            <link.icon className="w-6 h-6" />
+                            <span className="text-[10px] font-bold uppercase tracking-tighter">{link.label.split(' ')[0]}</span>
+                        </NavLink>
+                    ))}
+                    <button 
+                        onClick={handleLogout}
+                        className="flex flex-col items-center gap-1 text-red-400 transition-all duration-200"
+                    >
+                        <LogOut className="w-6 h-6" />
+                        <span className="text-[10px] font-bold uppercase tracking-tighter">Exit</span>
+                    </button>
+                </nav>
             </div>
         </div>
     );

@@ -18,7 +18,7 @@ export default function SubjectsPage() {
     const [selectedBatch, setSelectedBatch] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingSubject, setEditingSubject] = useState(null);
-    const [formData, setFormData] = useState({ name: '', code: '', description: '' });
+    const [formData, setFormData] = useState({ name: '', code: '', description: '', batchId: '' });
 
     useEffect(() => {
         loadBatches();
@@ -58,14 +58,14 @@ export default function SubjectsPage() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!selectedBatch) {
-            toast.error('Please select a batch first');
+        if (!formData.batchId) {
+            toast.error('Please select a batch');
             return;
         }
 
         const method = editingSubject ? 'PUT' : 'POST';
         const url = editingSubject ? `/api/subjects/${editingSubject.id}` : '/api/subjects';
-        const payload = { ...formData, batchId: selectedBatch };
+        const payload = { ...formData };
 
         fetch(url, {
             method: method,
@@ -89,7 +89,8 @@ export default function SubjectsPage() {
         setFormData({ 
             name: subject.name, 
             code: subject.code || '', 
-            description: subject.description || '' 
+            description: subject.description || '',
+            batchId: subject.batchId
         });
         setIsDialogOpen(true);
     };
@@ -112,7 +113,7 @@ export default function SubjectsPage() {
     const closeDialog = () => {
         setIsDialogOpen(false);
         setEditingSubject(null);
-        setFormData({ name: '', code: '', description: '' });
+        setFormData({ name: '', code: '', description: '', batchId: '' });
     };
 
     const filteredSubjects = subjects.filter(s => 
@@ -142,7 +143,14 @@ export default function SubjectsPage() {
 
                         <Dialog open={isDialogOpen} onOpenChange={(open) => { if(!open) closeDialog(); else setIsDialogOpen(true); }}>
                             <DialogTrigger asChild>
-                                <Button className="bg-emerald-600 hover:bg-emerald-700 h-9 font-bold text-xs uppercase tracking-wider px-4">
+                                <Button 
+                                    className="bg-emerald-600 hover:bg-emerald-700 h-9 font-bold text-xs uppercase tracking-wider px-4"
+                                    onClick={() => {
+                                        if (!isDialogOpen) {
+                                            setFormData({ ...formData, batchId: selectedBatch });
+                                        }
+                                    }}
+                                >
                                     <Plus className="w-4 h-4 mr-2" /> New Subject
                                 </Button>
                             </DialogTrigger>
@@ -151,11 +159,29 @@ export default function SubjectsPage() {
                                     <DialogTitle className="text-xl font-black italic uppercase text-slate-900 tracking-tight">
                                         {editingSubject ? 'Edit Subject' : 'Add New Subject'}
                                     </DialogTitle>
-                                    <DialogDescription className="text-emerald-600 font-bold text-[10px] uppercase tracking-widest">
-                                        Assign to: {batches.find(b => b.id === selectedBatch)?.name || 'Selected Batch'}
+                                    <DialogDescription className="text-emerald-600 font-bold text-[10px] uppercase tracking-widest text-wrap">
+                                        Configure subject details and assign to an academic batch.
                                     </DialogDescription>
                                 </DialogHeader>
                                 <form onSubmit={handleSubmit} className="space-y-5 pt-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
+                                            <Layers className="w-3 h-3 text-emerald-500" /> Academic Batch
+                                        </label>
+                                        <Select 
+                                            value={formData.batchId} 
+                                            onValueChange={(val) => setFormData({ ...formData, batchId: val })}
+                                        >
+                                            <SelectTrigger className="border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20 font-bold text-slate-700">
+                                                <SelectValue placeholder="Select Batch" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {batches.map(b => (
+                                                    <SelectItem key={b.id} value={b.id} className="font-medium text-slate-700">{b.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                     <div className="space-y-1">
                                         <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
                                             <Tag className="w-3 h-3 text-emerald-500" /> Subject Name

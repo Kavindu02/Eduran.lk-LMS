@@ -144,11 +144,14 @@ class User {
             SELECT 
                 us.subject_id as subjectId,
                 s.name as subjectName,
+                s.batchId as batchId,
+                b.name as batchName,
                 us.teacher_id as teacherId,
                 t.name as teacherName,
                 us.payment_status as paymentStatus
             FROM user_subjects us 
             LEFT JOIN subjects s ON us.subject_id = s.id
+            LEFT JOIN batches b ON s.batchId = b.id
             LEFT JOIN teachers t ON us.teacher_id = t.id
             WHERE us.user_id = ?
         `, [userId]);

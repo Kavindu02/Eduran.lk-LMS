@@ -68,20 +68,20 @@ export default function WatchVideoPage() {
 
     return (
         <ProtectedLayout requiredRole="student" title={video.title}>
-            <div className="space-y-10 animate-fadeIn font-sans">
+            <div className="space-y-6 md:space-y-10 animate-fadeIn font-sans">
                 {/* Back Button */}
                 <button 
                   onClick={() => navigate('/student/dashboard')} 
-                  className="flex items-center gap-2 text-white/40 hover:text-emerald-500 transition-colors uppercase font-black tracking-[0.3em] text-[10px]"
+                  className="flex items-center gap-2 text-white/40 hover:text-emerald-500 transition-colors uppercase font-black tracking-[0.3em] text-[8px] md:text-[10px]"
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   Back Access
                 </button>
 
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 md:gap-10">
                     {/* Video Player */}
-                    <div className="lg:col-span-3 space-y-8">
-                        <div className="rounded-3xl overflow-hidden aspect-video bg-black/40 border border-white/5 shadow-2xl relative">
+                    <div className="lg:col-span-3 space-y-6 md:space-y-8">
+                        <div className="rounded-2xl md:rounded-3xl overflow-hidden aspect-video bg-black/40 border border-white/5 shadow-2xl relative">
                             {video.youtubeUrl ? (
                               <iframe 
                                 width="100%" height="100%" 
@@ -93,30 +93,30 @@ export default function WatchVideoPage() {
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-[#0a1a12]">
-                                <p className="text-white/20 uppercase font-black tracking-widest text-xs">Video Feed Offline</p>
+                                <p className="text-white/20 uppercase font-black tracking-widest text-[10px] md:text-xs">Video Feed Offline</p>
                               </div>
                             )}
                         </div>
 
                         {/* Video Info */}
-                        <div className="bg-black/20 border border-white/5 rounded-3xl p-8 md:p-10 space-y-6">
+                        <div className="bg-black/20 border border-white/5 rounded-2xl md:rounded-3xl p-6 md:p-10 space-y-6">
                             <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-1 h-8 bg-emerald-500 rounded-full" />
-                                  <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight">{video.title}</h1>
+                                <div className="flex items-start gap-3">
+                                  <div className="w-1 h-6 md:h-8 bg-emerald-500 rounded-full mt-1 md:mt-0" />
+                                  <h1 className="text-xl md:text-3xl font-black text-white uppercase tracking-tight leading-tight">{video.title}</h1>
                                 </div>
-                                <div className="flex items-center gap-6">
-                                    <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-lg">
-                                        <Clock className="w-3.5 h-3.5" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">{video.duration || 'Full Session'}</span>
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                                    <div className="flex items-center gap-2 bg-emerald-500/10 text-emerald-500 px-2.5 md:px-3 py-1 rounded-lg w-fit">
+                                        <Clock className="w-3 md:w-3.5 h-3 md:h-3.5" />
+                                        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">{video.duration || 'Full Session'}</span>
                                     </div>
-                                    <span className="text-white/30 text-[10px] font-black uppercase tracking-widest">Recorded: {new Date(video.createdAt).toLocaleDateString()}</span>
+                                    <span className="text-white/30 text-[9px] md:text-[10px] font-black uppercase tracking-widest">Recorded: {new Date(video.createdAt).toLocaleDateString()}</span>
                                 </div>
                             </div>
 
-                            <div className="border-t border-white/5 pt-8">
-                                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-4">Lesson Abstract</h4>
-                                <p className="text-white/60 leading-relaxed font-medium italic font-serif text-lg">
+                            <div className="border-t border-white/5 pt-6 md:pt-8">
+                                <h4 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mb-3 md:mb-4">Lesson Abstract</h4>
+                                <p className="text-white/60 leading-relaxed font-medium italic font-serif text-base md:text-lg">
                                     {video.description || 'Access complete educational support materials through our student portal.'}
                                 </p>
                             </div>
@@ -125,11 +125,11 @@ export default function WatchVideoPage() {
 
                     {/* Sidebar Placeholder / Controls */}
                     <div className="space-y-6">
-                        <div className="bg-[#0a1a12] border border-white/5 rounded-3xl p-6">
-                            <h3 className="text-white font-black uppercase tracking-widest text-[11px] mb-4 pb-2 border-b border-white/5">Quick Navigation</h3>
+                        <div className="bg-[#0a1a12] border border-white/5 rounded-2xl md:rounded-3xl p-5 md:p-6">
+                            <h3 className="text-white font-black uppercase tracking-widest text-[10px] md:text-[11px] mb-4 pb-2 border-b border-white/5">Quick Navigation</h3>
                             <div className="space-y-3">
                                 <Button 
-                                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest text-[9px] rounded-xl h-11"
+                                    className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest text-[8px] md:text-[9px] rounded-xl h-10 md:h-11"
                                     onClick={() => navigate('/student/lessons')}
                                 >
                                     Switch Subject

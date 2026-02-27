@@ -169,7 +169,11 @@ class User {
         `;
         const [users] = await db.execute(query);
 
-        for (let user of users) {
+        // Hide the .env student from the student list
+        const envStudentEmail = process.env.STUDENT_EMAIL;
+        const filteredUsers = users.filter(user => user.email !== envStudentEmail);
+
+        for (let user of filteredUsers) {
             const [subjects] = await db.execute(`
                 SELECT 
                     us.subject_id as subjectId,
@@ -185,13 +189,15 @@ class User {
             user.selectedSubjects = subjects;
         }
 
-        return users;
+        return filteredUsers;
     }
 
     static async getAllAdmins() {
         const query = "SELECT id, email, name, role FROM users WHERE role = 'admin' ORDER BY id DESC";
         const [rows] = await db.execute(query);
-        return rows;
+        // Hide the .env admin from the admin list
+        const envAdminEmail = process.env.ADMIN_EMAIL;
+        return rows.filter(admin => admin.email !== envAdminEmail);
     }
 
     static async delete(id) {

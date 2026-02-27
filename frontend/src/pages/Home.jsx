@@ -44,12 +44,12 @@ export default function Home() {
   // Teachers Data for Expert Faculty Section
   const teachers = [
     { name: "Positha THENNAKOON", subject: "Physics", qual: "B.Sc in PHYSICS", img: "/posithathennkoon.png" },
-    { name: "Pramil Wijerathne", subject: "Combined Maths", qual: "Bsc. Engineering (Hons) University of Peradeniya", img: "/PramilWijerathne.png" },
+    { name: "Pramil Wijerathne", subject: "Combined Maths", qual: "Bsc. Engineering (Hons) University of Peradeniya", img: "/pramil.png" },
     { name: "Chanaka Wijesinghe", subject: "Chemistry", qual: "B.Sc (University of colombo)", img: "/chanaka.png" },
     { name: "MAHESH BAJJALA", subject: "Biology", qual: "B.Sc (Biological Science) Hons. Special in Botany (Upper Division)", img: "/MAHESHBAJJALA.png" },
     { name: "Dinuka Dilhara", subject: "Biology", qual: "B.Sc (University of Colombo)", img: "/DinukaDilhara.png" },
     { name: "THUSHARA SAMPATH", subject: "Accounting", qual: "B.Sc Finance Special (SJP) | AAT Lecturer / Part Qualified ICASL", img: "/thushara.png" },
-    { name: "Lahiru Liyanarachchi", subject: "Economics", qual: "BBA.Mgt.SP University of Peradeniya | MAAT", img: "/LahiruLiyanarachchi.png" },
+    { name: "Lahiru Liyanarachchi", subject: "Economics", qual: "BBA.Mgt.SP University of Peradeniya | MAAT", img: "/Lahiru.png" },
     { name: "DILAN WIJERATHNE", subject: "Business Studies", qual: "BBA, Mgt (UOC), CBF, DBF, Dip in HR", img: "/dialn.png" },
   ];
 
@@ -121,10 +121,10 @@ export default function Home() {
   }, [user, logout]);
 
   const heroImages = [
-    '/hero.jpg',
-    '/male-scientist-carefully-studies-his-data.jpg',
-    '/heroimage.jpg',
-    '/group-friends-planning-trip-cafe.jpg',
+    'https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168631/hero_1_1_fcoggi.jpg',
+    'https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168632/male-scientist-carefully-studies-his-data_2_1_kbdyzc.jpg',
+    'https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168606/heroimage_1_1_ono2xx.jpg',
+    'https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168636/group-friends-planning-trip-cafe_1_1_mhfa7k.jpg',
   ];
 
   // Robust animation loop using ref to avoid React render cycles for progress
@@ -433,7 +433,7 @@ export default function Home() {
                 {/* 2. Main Character Image */}
                 <div className="relative w-[90%] h-[90%] z-10 overflow-hidden flex items-end justify-center">
                   <img 
-                    src="/leisure-activity-women-cute-grass-technology.jpg" 
+                    src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168630/leisure-activity-women-cute-grass-technology_1_1_czh3sn.jpg" 
                     alt="Student" 
                     loading="lazy"
                     className="w-full h-full object-cover rounded-[35px] lg:rounded-[50px] transform transition-transform duration-700 hover:scale-105"
@@ -463,9 +463,11 @@ export default function Home() {
                     <div className="flex -space-x-2 lg:-space-x-3">
                        <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full border-2 lg:border-4 border-white overflow-hidden bg-gray-200">
                          <img src="/heroimage.jpg" alt="Learner" className="w-full h-full object-cover" />
+                                             <img src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168606/heroimage_1_1_ono2xx.jpg" alt="Learner" className="w-full h-full object-cover" />
                        </div>
                        <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full border-2 lg:border-4 border-white overflow-hidden bg-gray-200">
                          <img src="/about1.jpg" alt="Learner" className="w-full h-full object-cover" />
+                                        <img src="/about1.jpg" alt="Learner" className="w-full h-full object-cover" />
                        </div>
                        <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full border-2 lg:border-4 border-white overflow-hidden flex items-center justify-center bg-green-500 text-white text-[8px] lg:text-[10px] font-bold">
                          3.5k+
@@ -606,7 +608,7 @@ export default function Home() {
                 {/* Main Large Image (Top-Left Position) */}
                 <div className="absolute top-0 left-0 w-[70%] h-[60%] sm:w-[460px] sm:h-[380px] rounded-[24px] lg:rounded-[32px] overflow-hidden shadow-2xl z-20 animate-floating border-[6px] lg:border-[12px] border-white">
                   <img 
-                    src="/black-hat-university-graduates-is-placed-green-leaves.jpg" 
+                    src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168612/black-hat-university-graduates-is-placed-green-leaves_1_1_s21ar8.jpg" 
                     alt="Students Collaboration" 
                     loading="lazy"
                     className="w-full h-full object-cover"
@@ -616,7 +618,7 @@ export default function Home() {
                 {/* Overlapping Image (Bottom-Right Position) */}
                 <div className="absolute bottom-0 right-0 w-[60%] h-[50%] sm:w-[360px] sm:h-[300px] rounded-[24px] lg:rounded-[32px] overflow-hidden shadow-2xl z-30 animate-floating border-[6px] lg:border-[12px] border-white" style={{ animationDelay: '1s' }}>
                   <img 
-                    src="/rear-view-man-graduation-gown-standing-against-sky.jpg" 
+                    src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168629/rear-view-man-graduation-gown-standing-against-sky_1_1_lkwabp.jpg" 
                     alt="Academic Study" 
                     loading="lazy"
                     className="w-full h-full object-cover"
@@ -755,6 +757,38 @@ export default function Home() {
         </div>
       </section>
 
+      {/* SL Post Tracking Banner Section */}
+      <section className="relative py-4 sm:py-8 bg-white flex justify-center items-center overflow-hidden">
+        <div 
+          className="w-full max-w-[95vw] sm:max-w-2xl md:max-w-4xl flex flex-col md:flex-row items-stretch md:items-center md:justify-between gap-3 sm:gap-8 px-2 sm:px-6 md:px-10 py-3 sm:py-8 rounded-2xl shadow-2xl" 
+          style={{ 
+            background: 'linear-gradient(135deg, #21822E 0%, #22c55e 100%)', 
+            border: '1px solid #16a34a99' 
+          }}
+        >
+          <div className="flex-1 w-full text-center md:text-left mb-4 md:mb-0 flex flex-col justify-center">
+            <h3 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-black text-black mb-1 tracking-tight uppercase leading-tight">SL Post Quriya Service</h3>
+            <p className="text-black text-xs xs:text-sm sm:text-base font-medium mb-2 leading-snug">Track your Quriya service parcels sent by the academy. Click below to check your tracking number status instantly.</p>
+            <p className="text-white text-xs xs:text-sm italic leading-snug">No need to type your tracking number. Just click the button below and follow the instructions on the SL Post site.</p>
+          </div>
+          <div className="flex-shrink-0 w-full md:w-auto flex flex-col items-center justify-center gap-2">
+            <a
+              href="https://slpmail.slpost.gov.lk/track/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full md:w-auto text-center px-4 xs:px-6 sm:px-7 py-3 sm:py-3.5 bg-black hover:bg-green-900 text-white font-black text-base xs:text-lg rounded-full shadow-lg transition-all duration-300 uppercase tracking-wider border-2 border-black hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400"
+            >
+              Track Now
+            </a>
+            <span className="text-[10px] sm:text-xs text-black mt-1">Powered by Sri Lanka Post</span>
+          </div>
+        </div>
+        {/* Decorative background shapes */}
+        <div className="absolute -top-8 -left-8 w-20 xs:w-28 sm:w-40 h-20 xs:h-28 sm:h-40 bg-green-500/20 rounded-full blur-2xl z-0" />
+        <div className="absolute -bottom-8 -right-8 w-20 xs:w-28 sm:w-40 h-20 xs:h-28 sm:h-40 bg-green-900/20 rounded-full blur-2xl z-0" />
+      </section>
+
+      
       {/* Modern Compact Footer */}
       <footer className="relative bg-[#0A1D15] pt-12 lg:pt-16 pb-6 lg:pb-8 overflow-hidden border-t border-white/5">
         {/* Ambient background decoration */}

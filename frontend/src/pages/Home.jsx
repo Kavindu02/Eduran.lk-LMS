@@ -245,7 +245,7 @@ export default function Home() {
         </header>
 
         {/* Gradient Background for Hero section */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#2eb341] via-[#259334] to-[#15541c]" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#14521c] via-[#11421a] to-[#0a2a10]" />
 
         {/* Background Pattern Elements - Performance Optimized to 12 symbols */}
         <div className="absolute inset-x-0 inset-y-0 opacity-[0.06] pointer-events-none select-none z-0 overflow-hidden transform-gpu">
@@ -274,33 +274,17 @@ export default function Home() {
             
             {/* Left Content */}
             <div className="order-2 lg:order-1 space-y-8 lg:space-y-12 pt-0 z-20 text-center lg:text-left lg:-ml-12 -mt-16 lg:mt-0">
-              <div className="space-y-4 mt-0 lg:-mt-44">
-                <h1 className="text-4xl sm:text-6xl lg:text-[70px] font-black leading-[1.05] lg:leading-[1.05] tracking-tighter text-white uppercase drop-shadow-2xl">
-                  <div className="overflow-hidden">
-                    <span
-                      className="block animate-slideInUp text-white font-serif font-bold normal-case"
-                      style={{ animationDelay: '0.1s' }}
-                    >
-                      <span className="block sm:inline">Sri Lanka’s</span>
-                      <span className="block sm:inline sm:ml-2">No 01</span>
-                    </span>
-                  </div>
-                  <div className="overflow-hidden">
-                    <span
-                      className="block animate-slideInUp text-green-500 font-black uppercase"
-                      style={{ animationDelay: '0.2s' }}
-                    >
-                      <span className="text-[2.8rem] sm:text-[4.5rem] md:text-[6rem] lg:text-[7.5rem] xl:text-[9rem] 2xl:text-[10rem] leading-none">ONLINE</span>
-                    </span>
-                  </div>
-                  <div className="overflow-hidden">
-                    <span
-                      className="block animate-slideInUp text-white font-extrabold uppercase"
-                      style={{ animationDelay: '0.3s' }}
-                    >
-                      <span className="text-[1.5rem] sm:text-[2.2rem] md:text-[2.8rem]">LEARNING ACADEMY</span>
-                    </span>
-                  </div>
+              <div className="space-y-0 mt-0 lg:-mt-54">
+                <h1 className="w-full text-center">
+                  <span className="block font-serif font-bold text-white text-[2rem] xs:text-[6.5rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[4.2rem] xl:text-[4.3rem] leading-tight mb-0.9" style={{letterSpacing:'0.009em'}}>
+                    Sri Lanka’s No 01
+                  </span>
+                  <span className="block font-black uppercase text-green-400 text-[3.7rem] xs:text-[4.3rem] sm:text-[5.7rem] md:text-[6.7rem] lg:text-[7.7rem] xl:text-[10.5rem] leading-none mb-0 tracking-tight" style={{fontStretch:'condensed', letterSpacing:'-0.03em', textShadow:'0 2px 8px rgba(0,0,0,0.18)'}}>
+                    ONLINE
+                  </span>
+                  <span className="block font-extrabold uppercase text-white text-[1.1rem] xs:text-[1.3rem] sm:text-[2rem] md:text-[2.3rem] lg:text-[2.6rem] xl:text-[2.9rem] leading-none tracking-tight mb-6" style={{letterSpacing:'0.04em'}}>
+                    LEARNING ACADEMY
+                  </span>
                 </h1>
               </div>
               
@@ -308,20 +292,14 @@ export default function Home() {
                 {/* Removed 'are you ready to learn?' as requested */}
               </div>
 
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 pt-0 animate-scaleIn" style={{ animationDelay: '0.6s' }}>
-                <Button 
-                  size="lg" 
+              <div className="flex flex-wrap items-center justify-center gap-8 pt-0 animate-scaleIn" style={{ animationDelay: '0.6s' }}>
+                <button
                   onClick={goToRegister}
-                  className="relative h-14 px-9 bg-white hover:bg-green-600 text-black hover:text-white text-sm font-black rounded-sm shadow-[6px_6px_0_0_rgba(34,197,94,0.3)] transition-all duration-500 hover:translate-x-1 hover:translate-y-1 hover:shadow-none active:scale-95 group overflow-hidden border-none uppercase tracking-[0.2em]"
+                  className="mt-2 mb-2 px-10 py-3 sm:px-14 sm:py-4 md:px-16 md:py-5 lg:px-20 lg:py-6 rounded-full bg-green-400 hover:bg-green-500 text-white text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold shadow-xl transition-all duration-300 uppercase tracking-widest border-none focus:ring-4 focus:ring-green-300 focus:ring-opacity-50"
+                  style={{ letterSpacing: '0.13em', boxShadow: '0 6px 32px 0 rgba(34,197,94,0.25)' }}
                 >
-                  <div className="absolute -inset-full bg-gradient-to-r from-transparent via-white/20 to-transparent rotate-45 translate-x-[-150%] group-hover:translate-x-[150%] duration-1000 transition-transform" />
-                  <span className="relative flex items-center gap-4">
-                    Register Now
-                    <div className="bg-green-500/10 group-hover:bg-white/20 p-1.5 rounded-sm group-hover:translate-x-1 transition-all duration-500">
-                      <ChevronRight className="w-5 h-5" />
-                    </div>
-                  </span>
-                </Button>
+                  REGISTER NOW
+                </button>
               </div>
             </div>
 
@@ -462,12 +440,12 @@ export default function Home() {
                   <div className="flex items-center">
                     <div className="flex -space-x-2 lg:-space-x-3">
                        <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full border-2 lg:border-4 border-white overflow-hidden bg-gray-200">
-                         <img src="/heroimage.jpg" alt="Learner" className="w-full h-full object-cover" />
-                                             <img src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168606/heroimage_1_1_ono2xx.jpg" alt="Learner" className="w-full h-full object-cover" />
+                         <img src="/about1.jpg" alt="Learner" className="w-full h-full object-cover" />
+            <img src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168606/heroimage_1_1_ono2xx.jpg" alt="Learner" className="w-full h-full object-cover" />
                        </div>
                        <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full border-2 lg:border-4 border-white overflow-hidden bg-gray-200">
                          <img src="/about1.jpg" alt="Learner" className="w-full h-full object-cover" />
-                                        <img src="/about1.jpg" alt="Learner" className="w-full h-full object-cover" />
+                            <img src="/about1.jpg" alt="Learner" className="w-full h-full object-cover" />
                        </div>
                        <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full border-2 lg:border-4 border-white overflow-hidden flex items-center justify-center bg-green-500 text-white text-[8px] lg:text-[10px] font-bold">
                          3.5k+
@@ -767,8 +745,8 @@ export default function Home() {
           }}
         >
           <div className="flex-1 w-full text-center md:text-left mb-4 md:mb-0 flex flex-col justify-center">
-            <h3 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-black text-black mb-1 tracking-tight uppercase leading-tight">SL Post Quriya Service</h3>
-            <p className="text-black text-xs xs:text-sm sm:text-base font-medium mb-2 leading-snug">Track your Quriya service parcels sent by the academy. Click below to check your tracking number status instantly.</p>
+            <h3 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-black text-black mb-1 tracking-tight uppercase leading-tight">Sri Lanka Post Courier Service</h3>
+            <p className="text-black text-xs xs:text-sm sm:text-base font-medium mb-2 leading-snug">Track your courier service parcels sent by the academy. Click below to check your tracking number status instantly.</p>
             <p className="text-white text-xs xs:text-sm italic leading-snug">No need to type your tracking number. Just click the button below and follow the instructions on the SL Post site.</p>
           </div>
           <div className="flex-shrink-0 w-full md:w-auto flex flex-col items-center justify-center gap-2">

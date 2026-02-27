@@ -3,8 +3,11 @@ import { useNavigate, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { LogOut, Menu, LayoutDashboard, Users, BookOpen, Video, GraduationCap, Layers, ShieldCheck, CreditCard } from 'lucide-react';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 export default function ProtectedLayout({ children, requiredRole, title = 'Dashboard' }) {
+    // All hooks must be called unconditionally and in the same order
+    const [showLogoutDialog, setShowLogoutDialog] = useState(false);
     const navigate = useNavigate();
     const { user, logout, isLoading } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
@@ -160,12 +163,38 @@ export default function ProtectedLayout({ children, requiredRole, title = 'Dashb
                             <link.icon className="w-5 h-5" />
                         </NavLink>
                     ))}
-                    <button 
-                        onClick={handleLogout}
-                        className="flex flex-col items-center justify-center min-w-[40px] min-h-[40px] text-red-400 transition-all duration-200"
-                    >
-                        <LogOut className="w-5 h-5" />
-                    </button>
+                    <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+                        <DialogTrigger asChild>
+                            <button 
+                                className="flex flex-col items-center justify-center min-w-[40px] min-h-[40px] text-red-400 transition-all duration-200"
+                                onClick={() => setShowLogoutDialog(true)}
+                            >
+                                <LogOut className="w-5 h-5" />
+                            </button>
+                        </DialogTrigger>
+                        <DialogContent showCloseButton={false}>
+                            <DialogHeader>
+                                <DialogTitle>Are you sure?</DialogTitle>
+                                <DialogDescription>
+                                    Do you want to logout?
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                                <Button 
+                                    variant="ghost" 
+                                    onClick={() => setShowLogoutDialog(false)}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button 
+                                    variant="destructive" 
+                                    onClick={handleLogout}
+                                >
+                                    Logout
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </nav>
             </div>
         </div>

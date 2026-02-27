@@ -518,12 +518,8 @@ export default function RegisterPage() {
                   </Link>
                 </p>
                 
-                <Link to="/" className="text-[10px] text-white/20 hover:text-white transition-colors uppercase tracking-[0.3em] block text-center mt-2">
-                  {/* Scroll to hero section on home */}
-                  <Link to="/#hero-section" className="text-[10px] text-white/20 hover:text-white transition-colors uppercase tracking-[0.3em] block text-center mt-2">
-                    ← Back to home
-                  </Link>
-                </Link>
+                {/* Only one Link, not nested */}
+               
               </div>
 
             </form>

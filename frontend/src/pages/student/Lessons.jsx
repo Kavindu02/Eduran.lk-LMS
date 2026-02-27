@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Video as VideoIcon, BookOpen, ArrowRight, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 const getYoutubeId = (url) => {
     if (!url) return '';

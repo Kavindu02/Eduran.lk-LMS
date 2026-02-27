@@ -49,16 +49,11 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#06120c] flex items-center justify-center p-4 relative overflow-hidden font-sans">
+        <div className="min-h-screen bg-gradient-to-br from-[#2eb341] via-[#259334] to-[#15541c] flex items-center justify-center p-4 relative overflow-hidden font-sans">
             
             {/* --- Background Elements --- */}
             <div className="fixed inset-0 z-0 pointer-events-none">
-                <div 
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: "url('/color.png')" }}
-                >
-                    <div className="absolute inset-0 bg-[#0a261a]/90 backdrop-blur-sm" />
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-[#2eb341] via-[#259334] to-[#15541c]" />
                 
                 {/* Background Tiled Logos */}
                 <div className="absolute inset-0 opacity-10">
@@ -93,17 +88,17 @@ export default function LoginPage() {
                 </div>
 
                 {/* Decorative Blurs */}
-                <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px] animate-pulse" />
-                <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-emerald-400/10 rounded-full blur-[100px]" />
+                <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-green-500/20 rounded-full blur-[100px] animate-pulse" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-green-400/10 rounded-full blur-[100px]" />
             </div>
 
             <HydrationWrapper className="w-full max-w-md relative z-10">
                 {/* Logo Section */}
                 <div className="flex flex-col items-center mb-10 animate-fadeIn text-center">
                     <h2 className="text-white text-4xl md:text-5xl font-black tracking-tighter uppercase leading-tight">
-                        Welcome <span className="text-emerald-500">Back</span>
+                        Welcome <span className="text-green-500">Back</span>
                     </h2>
-                    <p className="text-white/60 font-serif italic text-lg mt-2 underline decoration-emerald-500/30 underline-offset-4">
+                    <p className="text-white/60 font-serif italic text-lg mt-2 underline decoration-green-500/30 underline-offset-4">
                         are you ready to continue?
                     </p>
                 </div>
@@ -121,15 +116,15 @@ export default function LoginPage() {
 
                             {/* Email Input */}
                             <div className="space-y-2 group">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 ml-1">Email Address</label>
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-green-500 ml-1">Email Address</label>
                                 <div className="relative">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 group-focus-within:text-emerald-500 transition-colors" />
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 group-focus-within:text-green-500 transition-colors" />
                                     <Input 
                                         type="email" 
                                         placeholder="STUDENT@EDURA.COM" 
                                         value={email} 
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="h-14 bg-white/5 border-white/10 pl-12 text-white placeholder:text-white/20 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all rounded-xl"
+                                        className="h-14 bg-white/5 border-white/10 pl-12 text-white placeholder:text-white/20 focus:ring-green-500/20 focus:border-green-500/50 transition-all rounded-xl"
                                         required 
                                     />
                                 </div>
@@ -137,15 +132,15 @@ export default function LoginPage() {
 
                             {/* Password Input */}
                             <div className="space-y-2 group">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 ml-1">Secret Key</label>
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-green-500 ml-1">Secret Key</label>
                                 <div className="relative">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 group-focus-within:text-emerald-500 transition-colors" />
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 group-focus-within:text-green-500 transition-colors" />
                                     <Input 
                                         type="password" 
                                         placeholder="••••••••" 
                                         value={password} 
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="h-14 bg-white/5 border-white/10 pl-12 text-white placeholder:text-white/20 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all rounded-xl"
+                                        className="h-14 bg-white/5 border-white/10 pl-12 text-white placeholder:text-white/20 focus:ring-green-500/20 focus:border-green-500/50 transition-all rounded-xl"
                                         required 
                                     />
                                 </div>
@@ -155,9 +150,9 @@ export default function LoginPage() {
                             <Button 
                                 type="submit" 
                                 disabled={loading} 
-                                className="w-full h-14 bg-white hover:bg-emerald-500 text-black hover:text-white font-black uppercase tracking-[0.2em] text-xs transition-all duration-500 rounded-xl shadow-[0_10px_20px_-5px_rgba(16,185,129,0.3)] group overflow-hidden relative"
+                                className="w-full h-14 bg-white hover:bg-green-500 text-black hover:text-white font-black uppercase tracking-[0.2em] text-xs transition-all duration-500 rounded-xl shadow-[0_10px_20px_-5px_rgba(34,197,94,0.3)] group overflow-hidden relative"
                             >
-                                <div className="absolute -inset-full bg-gradient-to-r from-transparent via-emerald-500/10 to-transparent rotate-45 translate-x-[-150%] group-hover:translate-x-[150%] duration-1000 transition-transform" />
+                                <div className="absolute -inset-full bg-gradient-to-r from-transparent via-green-500/10 to-transparent rotate-45 translate-x-[-150%] group-hover:translate-x-[150%] duration-1000 transition-transform" />
                                 <span className="relative flex items-center justify-center gap-2">
                                     {loading ? 'Authenticating...' : 'Enter Dashboard'}
                                     {!loading && <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
@@ -168,7 +163,7 @@ export default function LoginPage() {
                         <div className="mt-8 flex flex-col items-center gap-4 text-center">
                             <p className="text-white/40 text-[11px] font-bold uppercase tracking-widest">
                                 New here?{' '}
-                                <Link to="/register" className="text-emerald-500 hover:text-emerald-400 transition-colors underline underline-offset-4">
+                                <Link to="/register" className="text-green-500 hover:text-green-400 transition-colors underline underline-offset-4">
                                     Create Account
                                 </Link>
                             </p>

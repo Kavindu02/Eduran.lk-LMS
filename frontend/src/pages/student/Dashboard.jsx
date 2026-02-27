@@ -25,7 +25,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function StudentDashboard() {
     const { user, updateCurrentUser } = useAuth();

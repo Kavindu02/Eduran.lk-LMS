@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const UserSubjectPayment = require('../models/UserSubjectPayment');
 
 // Secret for additional hashing security "pepper"
 const SALT_PEPPER = process.env.JWT_SECRET || 'fallback_secret';
@@ -207,6 +208,34 @@ exports.updateSubjectStatus = async (req, res) => {
         }
         await User.updateSubjectPayment(userId, subjectId, teacherId, status);
         res.json({ message: 'Subject payment status updated successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Get monthly payment status for a student/subject/teacher
+exports.getSubjectMonthPayments = async (req, res) => {
+    try {
+        const { userId, subjectId, teacherId } = req.query;
+        if (!userId || !subjectId) {
+            return res.status(400).json({ error: 'userId and subjectId are required' });
+        }
+        const payments = await UserSubjectPayment.getPayments(userId, subjectId, teacherId);
+        res.json({ months: payments });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Set monthly payment status for a student/subject/teacher
+exports.setSubjectMonthPayment = async (req, res) => {
+    try {
+        const { userId, subjectId, teacherId, year, month, status } = req.body;
+        if (!userId || !subjectId || !year || !month || !status) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        await UserSubjectPayment.setPayment(userId, subjectId, teacherId, year, month, status);
+        res.json({ message: 'Payment status updated' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

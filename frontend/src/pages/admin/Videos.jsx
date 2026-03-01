@@ -45,6 +45,7 @@ export default function VideosPage() {
         batchId: '',
         teacherId: '',
         duration: '',
+        month: '', // new field for month
     });
 
     useEffect(() => {
@@ -130,6 +131,7 @@ export default function VideosPage() {
             batchId: video.batchId,
             teacherId: video.teacherId || '',
             duration: video.duration || '',
+            month: video.month || '',
         });
         setIsDialogOpen(true);
     };
@@ -152,7 +154,7 @@ export default function VideosPage() {
     const closeDialog = () => {
         setIsDialogOpen(false);
         setEditingVideo(null);
-        setFormData({ title: '', description: '', youtubeUrl: '', subjectId: '', batchId: '', teacherId: '', duration: '' });
+        setFormData({ title: '', description: '', youtubeUrl: '', subjectId: '', batchId: '', teacherId: '', duration: '', month: '' });
     };
 
     const filteredVideos = videos.filter(v => {
@@ -207,6 +209,24 @@ export default function VideosPage() {
                                     </DialogDescription>
                                 </DialogHeader>
                                 <form onSubmit={handleSubmit} className="space-y-5 pt-4">
+                                                                        <div className="grid grid-cols-2 gap-4">
+                                                                            <div className="space-y-1">
+                                                                                <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
+                                                                                    <Calendar className="w-3 h-3 text-emerald-500" /> Month
+                                                                                </label>
+                                                                                <select
+                                                                                    value={formData.month}
+                                                                                    onChange={e => setFormData({ ...formData, month: e.target.value })}
+                                                                                    className="w-full h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                                                                                    required
+                                                                                >
+                                                                                    <option value="">Select Month</option>
+                                                                                    {Array.from({ length: 12 }, (_, i) => (
+                                                                                        <option key={i+1} value={i+1}>{new Date(0, i).toLocaleString('default', { month: 'long' })}</option>
+                                                                                    ))}
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">

@@ -2,10 +2,10 @@ const db = require('../config/db');
 
 class Video {
     static async create(videoData) {
-        const { id, title, description, youtubeUrl, duration, subjectId, batchId, teacherId } = videoData;
+        const { id, title, description, youtubeUrl, duration, subjectId, batchId, teacherId, month } = videoData;
         const [result] = await db.execute(
-            'INSERT INTO videos (id, title, description, youtubeUrl, duration, subjectId, batchId, teacherId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [id, title, description || null, youtubeUrl, duration || null, subjectId, batchId, teacherId || null]
+            'INSERT INTO videos (id, title, description, youtubeUrl, duration, subjectId, batchId, teacherId, month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, title, description || null, youtubeUrl, duration || null, subjectId, batchId, teacherId || null, month || null]
         );
         return result;
     }
@@ -127,10 +127,19 @@ class Video {
     }
 
     static async update(id, updates) {
-        const fields = Object.keys(updates).map(field => `${field} = ?`).join(', ');
-        const values = Object.values(updates);
+        // Only allow updating known fields
+        const allowedFields = ['title', 'description', 'youtubeUrl', 'duration', 'subjectId', 'batchId', 'teacherId', 'month'];
+        const fields = [];
+        const values = [];
+        for (const key of allowedFields) {
+            if (Object.prototype.hasOwnProperty.call(updates, key)) {
+                fields.push(`${key} = ?`);
+                values.push(updates[key]);
+            }
+        }
+        if (fields.length === 0) return;
         values.push(id);
-        const [result] = await db.execute(`UPDATE videos SET ${fields} WHERE id = ?`, values);
+        const [result] = await db.execute(`UPDATE videos SET ${fields.join(', ')} WHERE id = ?`, values);
         return result;
     }
 

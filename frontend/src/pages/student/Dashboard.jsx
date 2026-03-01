@@ -292,60 +292,19 @@ export default function StudentDashboard() {
                                                         0{idx + 1}
                                                     </div>
                                                 </div>
-                                                
-                                                <div className="space-y-3">
-                                                    {sub.generalPaymentStatus === 'paid' && sub.teachers.length === 0 && (
-                                                        <div className="flex items-center gap-3 p-3 rounded-2xl border bg-emerald-500/5 border-emerald-500/20">
-                                                            <div className="w-9 h-9 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-black">
-                                                                <Check className="w-4 h-4" />
-                                                            </div>
-                                                            <div className="flex-1">
-                                                                <span className="text-[11px] font-black uppercase text-white">Full Access Granted</span>
-                                                                <div className="px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest bg-emerald-500/20 text-emerald-400 w-fit mt-1">
-                                                                    Unlocked
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {sub.teachers.map(t => {
-                                                        const isPaid = t.paymentStatus === 'paid' || sub.generalPaymentStatus === 'paid';
-                                                        return (
-                                                            <div 
-                                                                key={t.id} 
-                                                                className={`flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 ${
-                                                                    isPaid
-                                                                    ? 'bg-emerald-500/5 border-emerald-500/20'
-                                                                    : 'bg-black/20 border-white/5 opacity-50 hover:opacity-100'
-                                                                }`}
+                                                {/* Relevant teachers for this subject, styled as a horizontal list */}
+                                                {sub.teachers && sub.teachers.length > 0 && (
+                                                    <div className="flex flex-wrap gap-2 mt-3">
+                                                        {sub.teachers.map(t => (
+                                                            <span
+                                                                key={t.id}
+                                                                className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-emerald-100/70 text-emerald-700 border border-emerald-200"
                                                             >
-                                                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shadow-xl transition-all ${
-                                                                    isPaid 
-                                                                    ? 'bg-emerald-500 text-slate-950 scale-100 group-hover/item:scale-105' 
-                                                                    : 'bg-slate-800 text-slate-500'
-                                                                }`}>
-                                                                    <User className="w-4 h-4" />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <span className={`text-[11px] font-black uppercase tracking-tight block truncate ${isPaid ? 'text-white' : 'text-slate-500'}`}>{t.name}</span>
-                                                                    <div className="flex items-center gap-2 mt-1">
-                                                                        <div className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase tracking-widest ${
-                                                                            isPaid 
-                                                                            ? 'bg-emerald-500/20 text-emerald-400' 
-                                                                            : 'bg-slate-800 text-slate-700'
-                                                                        }`}>
-                                                                            {isPaid ? 'Unlocked' : 'Locked'}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                {isPaid && (
-                                                                    <div className="bg-emerald-500/20 p-1.5 rounded-lg">
-                                                                        <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
+                                                                {t.name}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>

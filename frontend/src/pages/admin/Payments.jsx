@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+// ...existing code...
 import ProtectedLayout from '@/components/protected-layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,10 +16,124 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 
 export default function PaymentsPage() {
-    const [students, setStudents] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [processingId, setProcessingId] = useState(null);
+        const [students, setStudents] = useState([]);
+        const [loading, setLoading] = useState(true);
+        const [searchTerm, setSearchTerm] = useState('');
+        const [processingId, setProcessingId] = useState(null);
+        // Month Modal State (must be inside component)
+        const [monthModal, setMonthModal] = useState({ open: false });
+
+        // Month names
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+
+
+        // Paid months state (real data)
+        const [paidMonths, setPaidMonths] = useState([]);
+
+        // Fetch paid months from backend when modal opens
+        useEffect(() => {
+            if (monthModal.open && monthModal.studentId && monthModal.subjectId) {
+                const params = new URLSearchParams({
+                    userId: monthModal.studentId,
+                    subjectId: monthModal.subjectId,
+                    teacherId: monthModal.teacherId || ''
+                });
+                fetch(`/api/users/subject-month-payments?${params.toString()}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        setPaidMonths(Array.isArray(data.months) ? data.months : []);
+                    })
+                    .catch(() => setPaidMonths([]));
+            } else {
+                setPaidMonths([]);
+            }
+        }, [monthModal]);
+
+        // Month Modal UI (must be inside component)
+        const MonthModal = () => {
+            if (!monthModal.open) return null;
+            // Build a map for quick lookup
+            const paidMap = {};
+            paidMonths.forEach(m => {
+                const key = `${m.year}-${String(m.month).padStart(2, '0')}`;
+                paidMap[key] = m.status === 'paid';
+            });
+            const year = 2026; // For now, static year
+
+            // Toggle paid/unpaid for a month
+            const handleToggleMonth = async (idx) => {
+                const monthNum = String(idx + 1).padStart(2, '0');
+                const key = `${year}-${monthNum}`;
+                const paid = paidMap[key] || false;
+                const newStatus = paid ? 'unpaid' : 'paid';
+                try {
+                    const res = await fetch('/api/users/subject-month-payments', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            userId: monthModal.studentId,
+                            subjectId: monthModal.subjectId,
+                            teacherId: monthModal.teacherId,
+                            year,
+                            month: idx + 1,
+                            status: newStatus
+                        })
+                    });
+                    if (res.ok) {
+                        // Update UI
+                        setPaidMonths(prev => {
+                            const updated = prev.filter(m => !(m.year === year && m.month === idx + 1));
+                            updated.push({ year, month: idx + 1, status: newStatus });
+                            return updated;
+                        });
+                        toast.success(`Marked as ${newStatus.toUpperCase()} for ${monthNames[idx]}`);
+                    } else {
+                        toast.error('Failed to update payment status');
+                    }
+                } catch {
+                    toast.error('Network error');
+                }
+            };
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+                    <div className="bg-white rounded-xl shadow-2xl p-6 w-[340px] relative">
+                        <button
+                            className="absolute top-2 right-3 text-slate-400 hover:text-red-500 font-bold text-lg"
+                            onClick={() => setMonthModal({ open: false })}
+                        >
+                            ×
+                        </button>
+                        <div className="mb-4">
+                            <div className="font-black text-slate-900 text-lg">{monthModal.subjectName}</div>
+                            <div className="text-xs text-slate-500 font-bold">{monthModal.teacherName}</div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                            {monthNames.map((name, idx) => {
+                                const monthNum = String(idx + 1).padStart(2, '0');
+                                const key = `${year}-${monthNum}`;
+                                const paid = paidMap[key] || false;
+                                return (
+                                    <div
+                                        key={key}
+                                        onClick={() => handleToggleMonth(idx)}
+                                        className={`rounded-lg px-2 py-2 text-center text-xs font-bold cursor-pointer border transition-all ${
+                                            paid ? 'bg-emerald-100 border-emerald-400 text-emerald-700' : 'bg-red-50 border-red-200 text-red-500'
+                                        }`}
+                                    >
+                                        {name}
+                                        <div className="text-[10px] font-black mt-1">{paid ? 'PAID' : 'UNPAID'}</div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
 
     useEffect(() => {
         loadStudents();
@@ -104,6 +219,7 @@ export default function PaymentsPage() {
 
     return (
         <ProtectedLayout requiredRole="admin" title="Payments Registry">
+            <MonthModal />
             <div className="space-y-6 animate-fadeIn">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div className="space-y-1">
@@ -217,27 +333,41 @@ export default function PaymentsPage() {
                                                                     </div>
                                                                     <div className="space-y-1">
                                                                         {group.teachers.map((sub) => (
-                                                                            <div key={`${student.id}-${sub.subjectId}-${sub.teacherId}`} 
+                                                                            <div key={`${student.id}-${sub.subjectId}-${sub.teacherId}`}
                                                                                 className={`flex items-center justify-between gap-3 p-2 rounded-lg border transition-all ${
                                                                                     sub.paymentStatus === 'paid' ? 'bg-emerald-50 border-emerald-100' : 'bg-white border-slate-100 hover:border-emerald-200'
                                                                                 }`}
                                                                             >
                                                                                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                                                    <Checkbox 
-                                                                                        checked={sub.paymentStatus === 'paid'}
-                                                                                        onCheckedChange={(checked) => handleUpdateSubjectStatus(student.id, sub.subjectId, sub.teacherId, checked ? 'paid' : 'pending')}
-                                                                                        disabled={processingId === `${student.id}-${sub.subjectId}-${sub.teacherId}`}
-                                                                                        className="w-4 h-4 rounded-md border-2 border-slate-200"
-                                                                                    />
                                                                                     <span className={`text-[9px] font-black uppercase tracking-tight truncate ${sub.paymentStatus === 'paid' ? 'text-emerald-700' : 'text-slate-600'}`}>
                                                                                         {(sub.teacherName || 'N/A').replace(/PROF\.\s/i, '')}
                                                                                     </span>
+                                                                                    {/* Paid months summary (if available) */}
+                                                                                    {sub.paidMonthsSummary && (
+                                                                                        <span className="ml-2 text-[9px] font-bold text-emerald-700 bg-emerald-100 rounded px-1">
+                                                                                            {sub.paidMonthsSummary}
+                                                                                        </span>
+                                                                                    )}
                                                                                 </div>
-                                                                                {sub.paymentStatus === 'paid' && (
-                                                                                    <div className="flex items-center gap-1 text-emerald-600 bg-emerald-500/10 px-1 py-0.5 rounded text-[7px] font-black">
-                                                                                        <Check className="w-2.5 h-2.5 stroke-[4]" /> PAID
-                                                                                    </div>
-                                                                                )}
+                                                                                {/* Remove old paid badge, now handled by summary */}
+                                                                                {/* View Months Button */}
+                                                                                <Button
+                                                                                    variant="outline"
+                                                                                    size="xs"
+                                                                                    className="ml-2 px-2 py-1 text-[9px] font-bold border-emerald-200"
+                                                                                    onClick={() => {
+                                                                                        setMonthModal({
+                                                                                            open: true,
+                                                                                            studentId: student.id,
+                                                                                            subjectId: sub.subjectId,
+                                                                                            teacherId: sub.teacherId,
+                                                                                            subjectName: group.name,
+                                                                                            teacherName: sub.teacherName || 'N/A',
+                                                                                        });
+                                                                                    }}
+                                                                                >
+                                                                                    View Months
+                                                                                </Button>
                                                                             </div>
                                                                         ))}
                                                                     </div>

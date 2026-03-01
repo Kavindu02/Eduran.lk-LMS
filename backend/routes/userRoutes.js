@@ -14,5 +14,7 @@ router.delete('/:id', userController.deleteUser);
 router.patch('/:id', userController.updateUserStatus); // Added generic update shortcut
 // In a real app we'd add auth middleware for this
 router.get('/profile', userController.getProfile);
+router.get('/subject-month-payments', userController.getSubjectMonthPayments);
+router.post('/subject-month-payments', userController.setSubjectMonthPayment);
 
 module.exports = router;

@@ -87,71 +87,62 @@ export default function StudentLessons() {
         fetchProfile();
     }, [user?.id]);
 
-    // Fetch videos when subject or teacher changes
+    // Fetch paid months and videos when subject or teacher changes
+    const [paidMonths, setPaidMonths] = useState([]);
+    const [isMonthPaid, setIsMonthPaid] = useState(false);
+    const [selectedMonth, setSelectedMonth] = useState("");
     useEffect(() => {
-        const fetchVideos = async () => {
-            // Only fetch if a subject is selected
+        const fetchAccessAndVideos = async () => {
             if (!selectedSubjectId) {
                 setVideos([]);
+                setPaidMonths([]);
+                setIsMonthPaid(false);
                 return;
             }
-            
             setIsRefreshing(true);
             try {
                 const currentSub = userSubjects.find(s => String(s.id) === String(selectedSubjectId));
                 if (!currentSub) return;
-
-                // Determine if we need to filter by a specific teacher or show all registered ones
                 const isAllTeachers = !selectedTeacherId || selectedTeacherId === 'all';
                 const teacherParam = !isAllTeachers ? `&teacherId=${selectedTeacherId}` : '';
-                
-                // Fetch videos using the SUBJECT'S batch ID, not the user's primary batch
-                // This allows students to take courses from different batches correctly.
+                // 1. Fetch paid months for this subject/teacher
+                const params = new URLSearchParams({
+                    userId: user.id,
+                    subjectId: selectedSubjectId,
+                });
+                if (!isAllTeachers) params.append('teacherId', selectedTeacherId);
+                const monthsRes = await fetch(`/api/users/subject-month-payments?${params.toString()}`);
+                let months = [];
+                if (monthsRes.ok) {
+                    const data = await monthsRes.json();
+                    months = Array.isArray(data.months) ? data.months : [];
+                }
+                setPaidMonths(months);
+                // 2. Check if selected month is paid
+                const now = new Date();
+                const year = now.getFullYear();
+                const paid = months.some(m => Number(m.year) === year && Number(m.month) === Number(selectedMonth) && m.status === 'paid');
+                setIsMonthPaid(paid);
+                // 3. Fetch videos
                 const url = `${API_URL}/videos?subjectId=${selectedSubjectId}${teacherParam}&batchId=${currentSub.batchId || ''}`;
                 const res = await fetch(url);
-                
                 if (res.ok) {
                     const data = await res.json();
-                    
-                    // NEW ACCESS LOGIC:
-                    // 1. If the student has paid for the whole subject (generalPaymentStatus === 'paid'),
-                    //    they can see all videos for that subject regardles of teacher pairing.
-                    // 2. Otherwise, they only see videos from teachers they specifically paid for.
-                    
-                    const isSubjectPaidGenerally = currentSub.generalPaymentStatus === 'paid';
-                    const paidTeacherIds = (currentSub.teachers || [])
-                        .filter(t => t.paymentStatus === 'paid')
-                        .map(t => String(t.id));
-                    
-                    let filteredData = [];
-                    
-                    if (isAllTeachers) {
-                        filteredData = data.filter(v => 
-                            isSubjectPaidGenerally || 
-                            (v.teacherId && paidTeacherIds.includes(String(v.teacherId)))
-                        );
-                    } else {
-                        // If specific teacher is selected, check if THEY are paid OR if the subject is paid generally
-                        const isSelectedTeacherPaid = (currentSub.teachers || []).some(t => String(t.id) === String(selectedTeacherId) && t.paymentStatus === 'paid');
-                        if (isSubjectPaidGenerally || isSelectedTeacherPaid) {
-                            filteredData = data;
-                        } else {
-                            filteredData = []; // No videos if not paid
-                        }
-                    }
-                    
-                    setVideos(filteredData);
+                    setVideos(data);
+                } else {
+                    setVideos([]);
                 }
             } catch (error) {
-                console.error('Error fetching videos:', error);
+                console.error('Error fetching videos or months:', error);
                 setVideos([]);
+                setPaidMonths([]);
+                setIsMonthPaid(false);
             } finally {
                 setIsRefreshing(false);
             }
         };
-
-        fetchVideos();
-    }, [selectedSubjectId, selectedTeacherId, user?.batchId, userSubjects]);
+        fetchAccessAndVideos();
+    }, [selectedSubjectId, selectedTeacherId, user?.batchId, userSubjects, selectedMonth]);
 
     const handleSubjectChange = (sid) => {
         setSelectedSubjectId(sid);
@@ -233,13 +224,11 @@ export default function StudentLessons() {
                                     >
                                         <BookOpen className={`w-5 h-5 md:w-6 md:h-6 mb-2 md:mb-3 transition-colors ${isSelected ? 'text-white' : 'text-emerald-500'}`} />
                                         <p className="text-[10px] md:text-[11px] font-black uppercase leading-[1.2] md:leading-tight tracking-tight line-clamp-2">{sub.name}</p>
-                                        
                                         {sub.batchName && (
-                                            <p className={`text-[8px] md:text-[9px] font-bold uppercase tracking-widest mt-1 opacity-70 ${isSelected ? 'text-emerald-100' : 'text-slate-400'}`}>
-                                                {sub.batchName}
-                                            </p>
+                                            <p className={`text-[8px] md:text-[9px] font-bold uppercase tracking-widest mt-1 opacity-70 ${isSelected ? 'text-emerald-100' : 'text-slate-400'}`}>{sub.batchName}</p>
                                         )}
-
+                                        {/* Relevant teachers for this subject, styled as a horizontal list */}
+                                        {/* Teacher list removed as per new UI */}
                                         {!isSelected && (
                                             <div className="absolute bottom-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <ArrowRight className="w-3 h-3 md:w-4 md:h-4 text-emerald-500" />
@@ -259,7 +248,7 @@ export default function StudentLessons() {
                     {/* Teacher Select Dropdown */}
                     <div className="lg:col-span-4 space-y-4">
                         <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 px-2">Choose Teacher</label>
-                        <div className="bg-white border border-slate-200 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 shadow-xl shadow-slate-200/50 h-full flex flex-col justify-center">
+                        <div className="bg-white border border-slate-200 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 shadow-xl shadow-slate-200/50 h-full flex flex-col justify-center gap-4">
                             <p className="text-[10px] md:text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-4 md:mb-6 text-center leading-relaxed">
                                 Filter content by your <br className="hidden md:block" /> preferred <span className="text-emerald-500">Professor</span>
                             </p>
@@ -273,8 +262,33 @@ export default function StudentLessons() {
                                         <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
                                             <User className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                         </div>
-                                        <div className="truncate text-left text-xs md:text-sm">
-                                            <SelectValue placeholder="All Registered Teachers" />
+                                        <div className="truncate text-left text-xs md:text-sm font-bold flex items-center gap-2">
+                                            {/* Show teacher name and payment badge if a teacher is selected, and update on month/teacher change */}
+                                            {(() => {
+                                                const currentSub = userSubjects.find(s => String(s.id) === String(selectedSubjectId));
+                                                if (!currentSub) return <SelectValue placeholder="All Registered Teachers" />;
+                                                if (selectedTeacherId === 'all') return <SelectValue placeholder="All Registered Teachers" />;
+                                                const teacher = (currentSub.teachers || []).find(t => String(t.id) === String(selectedTeacherId));
+                                                if (!teacher) return <SelectValue placeholder="All Registered Teachers" />;
+                                                // Check payment for selected month (teacher-level or subject-level)
+                                                const now = new Date();
+                                                const year = now.getFullYear();
+                                                // 1. Try to find a teacher-level payment
+                                                let paid = paidMonths.some(m => Number(m.year) === year && Number(m.month) === Number(selectedMonth) && m.status === 'paid' && String(m.teacherId) === String(selectedTeacherId));
+                                                // 2. If not found, try to find a subject-level payment (no teacherId or teacherId is null/undefined)
+                                                if (!paid) {
+                                                    paid = paidMonths.some(m => Number(m.year) === year && Number(m.month) === Number(selectedMonth) && m.status === 'paid' && (!m.teacherId || m.teacherId === null || m.teacherId === undefined));
+                                                }
+                                                return <>
+                                                    <span>{teacher.name}</span>
+                                                    <span className={paid
+                                                        ? "bg-green-50 text-green-600 text-[10px] md:text-xs px-3 py-1 rounded-full border border-green-100 font-bold uppercase tracking-widest ml-1"
+                                                        : "bg-red-50 text-red-500 text-[10px] md:text-xs px-3 py-1 rounded-full border border-red-100 font-bold uppercase tracking-widest ml-1"
+                                                    }>
+                                                        {paid ? 'PAID' : 'UNPAID'}
+                                                    </span>
+                                                </>;
+                                            })()}
                                         </div>
                                     </div>
                                 </SelectTrigger>
@@ -282,22 +296,32 @@ export default function StudentLessons() {
                                     <SelectItem value="all" className="rounded-xl font-bold py-3 text-[10px] md:text-xs">ALL REGISTERED TEACHERS</SelectItem>
                                     {(userSubjects.find(s => String(s.id) === String(selectedSubjectId))?.teachers || []).map(t => (
                                         <SelectItem key={t.id} value={String(t.id)} className="rounded-xl font-bold py-3 uppercase text-[10px] md:text-xs">
-                                            <div className="flex items-center justify-between w-full gap-2">
+                                            <div className="flex items-center w-full gap-2">
                                                 <span className="truncate">{t.name}</span>
-                                                {t.paymentStatus !== 'paid' && (
-                                                    <div className="shrink-0 bg-red-50 text-red-500 text-[7px] md:text-[8px] px-1.5 md:px-2 py-0.5 rounded-full border border-red-100 flex items-center gap-1">
-                                                        <svg className="w-1.5 h-1.5 md:w-2 md:h-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m0 0v2m0-2h2m-2 0H10m4-11a4 4 0 11-8 0 4 4 0 018 0z" /><path d="M8 11V7a4 4 0 118 0v4M5 11h14a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2z" /></svg>
-                                                        PENDING
-                                                    </div>
-                                                )}
                                             </div>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
+                            {/* Choose Month Dropdown */}
+                            <div>
+                                <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 mb-1 block">Choose Month</label>
+                                <select
+                                    value={selectedMonth}
+                                    onChange={e => setSelectedMonth(e.target.value)}
+                                    className="h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-emerald-500 outline-none w-full"
+                                >
+                                    <option value="">Choose Month</option>
+                                    {Array.from({ length: 12 }, (_, i) => (
+                                        <option key={i+1} value={i+1}>{new Date(0, i).toLocaleString('default', { month: 'long' })}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                {/* Month Selector Row */}
 
                 {/* Videos Display Section */}
                 <div className="space-y-6 md:space-y-8 pt-6 border-t border-slate-100">
@@ -326,9 +350,9 @@ export default function StudentLessons() {
                                 <div key={i} className="h-72 bg-white border border-slate-100 rounded-[2.5rem] animate-pulse" />
                             ))}
                         </div>
-                    ) : videos.length > 0 ? (
+                    ) : isMonthPaid && videos.filter(v => Number(v.month) === Number(selectedMonth)).length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                            {videos.map((video) => {
+                            {videos.filter(video => Number(video.month) === Number(selectedMonth)).map((video) => {
                                 const ytId = getYoutubeId(video.youtubeUrl);
                                 const thumbnailUrl = ytId 
                                     ? `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg` 

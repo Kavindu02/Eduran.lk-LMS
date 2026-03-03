@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
-import { 
-  Twitter, 
-  Facebook, 
-  Instagram, 
-  Search, 
-  ChevronLeft, 
+import {
+  Twitter,
+  Facebook,
+  Instagram,
+  Search,
+  ChevronLeft,
   ChevronRight,
   BookOpen,
   Video,
@@ -27,17 +27,17 @@ import {
 } from 'lucide-react';
 
 export default function Home() {
-    // Scroll to hero section if hash is present in URL
-    useEffect(() => {
-      if (window.location.hash === '#hero-section') {
-        setTimeout(() => {
-          document.getElementById('hero-section')?.scrollIntoView({ behavior: 'smooth' });
-        }, 100); // Wait for page render
-      }
-    }, []);
+  // Scroll to hero section if hash is present in URL
+  useEffect(() => {
+    if (window.location.hash === '#hero-section') {
+      setTimeout(() => {
+        document.getElementById('hero-section')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100); // Wait for page render
+    }
+  }, []);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  
+
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -69,11 +69,11 @@ export default function Home() {
       frameId = requestAnimationFrame(() => {
         const scrollY = window.pageYOffset || document.documentElement.scrollTop;
         const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-        
+
         if (totalHeight > 0) {
           setScrollProgress((scrollY / totalHeight) * 100);
         }
-        
+
         // Use a threshold to show/hide to avoid flicker
         setShowScrollTop(curr => {
           if (scrollY > 600 && !curr) return true;
@@ -121,9 +121,9 @@ export default function Home() {
   }, [user, logout]);
 
   const heroImages = [
-    'https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168631/hero_1_1_fcoggi.jpg',
-    'https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168632/male-scientist-carefully-studies-his-data_2_1_kbdyzc.jpg',
     'https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168606/heroimage_1_1_ono2xx.jpg',
+    'https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168631/hero_1_1_fcoggi.jpg',
+    'https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168632/male-scientist-carefully-studies-his-data_2_1_kbdyzc.jpg',,
     'https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168636/group-friends-planning-trip-cafe_1_1_mhfa7k.jpg',
   ];
 
@@ -166,40 +166,39 @@ export default function Home() {
             <div className="flex items-center animate-fadeInLeft -ml-6" style={{ animationDelay: '0.1s' }}>
               <Link to="/" className="group flex items-center transition-transform duration-500 hover:scale-105">
                 <div className="relative overflow-hidden w-32 h-auto md:w-40">
-                   <img 
-                     src="/logo.png" 
-                     alt="EDURA Logo" 
-                     className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(34,197,94,0.4)] transition-all duration-500 group-hover:drop-shadow-[0_0_20px_#22c55e]" 
-                   />
+                  <img
+                    src="/logo.png"
+                    alt="EDURA Logo"
+                    className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(34,197,94,0.4)] transition-all duration-500 group-hover:drop-shadow-[0_0_20px_#22c55e]"
+                  />
                 </div>
               </Link>
             </div>
 
             {/* Actions Section - Staggered Advanced Entrance */}
             <div className="flex items-center gap-3 md:gap-10">
-              
+
               {/* Navigation Link - Mobile only */}
-              <button 
+              <button
                 onClick={scrollToFaculty}
                 className="block lg:hidden text-[10px] font-black tracking-[0.25em] text-white/80 hover:text-green-500 transition-all duration-300 uppercase"
               >
                 Our Teachers
               </button>
               {/* Navigation Link - Desktop only */}
-              <button 
+              <button
                 onClick={scrollToFaculty}
                 className="hidden lg:block text-[10px] font-black tracking-[0.25em] text-white/80 hover:text-green-500 transition-all duration-300 uppercase"
               >
                 Our Teachers
               </button>
-              
+
               {/* Modern Search Bar - Kinetic Design - Hidden on mobile */}
-              <div 
-                className={`relative hidden md:flex items-center justify-end overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] animate-fadeIn ${
-                  isSearchExpanded 
-                  ? 'w-[calc(100vw-180px)] sm:w-[320px] md:w-[420px] bg-white/10 border-green-500/50 ring-4 ring-green-500/5 shadow-[0_0_50px_rgba(34,197,94,0.1)]' 
+              <div
+                className={`relative hidden md:flex items-center justify-end overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] animate-fadeIn ${isSearchExpanded
+                  ? 'w-[calc(100vw-180px)] sm:w-[320px] md:w-[420px] bg-white/10 border-green-500/50 ring-4 ring-green-500/5 shadow-[0_0_50px_rgba(34,197,94,0.1)]'
                   : 'w-10 h-10 md:w-12 md:h-12 bg-white/5 border-white/10 hover:border-green-500/30 hover:bg-white/10'
-                } backdrop-blur-2xl border rounded-full p-1 md:p-1.5 shadow-[0_0_40px_rgba(0,0,0,0.2)] cursor-pointer group`}
+                  } backdrop-blur-2xl border rounded-full p-1 md:p-1.5 shadow-[0_0_40px_rgba(0,0,0,0.2)] cursor-pointer group`}
                 onClick={() => {
                   if (!isSearchExpanded) {
                     setIsSearchExpanded(true);
@@ -208,29 +207,28 @@ export default function Home() {
                 }}
                 style={{ animationDelay: '0.3s' }}
               >
-                  <div className={`flex items-center w-full transition-opacity duration-500 delay-100 ${isSearchExpanded ? 'opacity-100' : 'opacity-0'}`}>
-                    <input 
-                      ref={searchInputRef}
-                      type="text" 
-                      placeholder="SEARCH..." 
-                      className="bg-transparent border-none outline-none text-[8px] md:text-[10px] font-black tracking-[0.2em] text-white placeholder:text-white/30 w-full ml-3 md:ml-4 uppercase"
-                      onBlur={() => {
-                        if (!searchInputRef.current?.value) {
-                           setIsSearchExpanded(false);
-                        }
-                      }}
-                    />
-                  </div>
-                  <div className={`h-8 w-8 md:h-9 md:w-9 bg-green-500 rounded-full flex-shrink-0 flex items-center justify-center text-black transition-all duration-500 shadow-lg shadow-green-500/20 active:scale-95 ${
-                    !isSearchExpanded ? 'mx-auto' : 'group-hover:rotate-12'
+                <div className={`flex items-center w-full transition-opacity duration-500 delay-100 ${isSearchExpanded ? 'opacity-100' : 'opacity-0'}`}>
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="SEARCH..."
+                    className="bg-transparent border-none outline-none text-[8px] md:text-[10px] font-black tracking-[0.2em] text-white placeholder:text-white/30 w-full ml-3 md:ml-4 uppercase"
+                    onBlur={() => {
+                      if (!searchInputRef.current?.value) {
+                        setIsSearchExpanded(false);
+                      }
+                    }}
+                  />
+                </div>
+                <div className={`h-8 w-8 md:h-9 md:w-9 bg-green-500 rounded-full flex-shrink-0 flex items-center justify-center text-black transition-all duration-500 shadow-lg shadow-green-500/20 active:scale-95 ${!isSearchExpanded ? 'mx-auto' : 'group-hover:rotate-12'
                   }`}>
-                    <Search className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  </div>
+                  <Search className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                </div>
               </div>
 
               <div className="flex items-center gap-4 md:gap-8 animate-fadeInRight" style={{ animationDelay: '0.5s' }}>
-                <Link 
-                  to={user ? (user.role?.toLowerCase() === 'admin' ? "/admin/dashboard" : "/student/dashboard") : "/login"} 
+                <Link
+                  to={user ? (user.role?.toLowerCase() === 'admin' ? "/admin/dashboard" : "/student/dashboard") : "/login"}
                   className="group relative block"
                 >
                   <div className="absolute -inset-0.5 bg-green-500 rounded-full opacity-0 group-hover:opacity-40 blur transition duration-500" />
@@ -251,10 +249,10 @@ export default function Home() {
         <div className="absolute inset-x-0 inset-y-0 opacity-[0.06] pointer-events-none select-none z-0 overflow-hidden transform-gpu">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-32 p-10 rotate-12 scale-[1.5]">
             {Array.from({ length: 12 }).map((_, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="text-white text-5xl font-serif animate-floating will-change-transform"
-                style={{ 
+                style={{
                   animationDelay: `${(i % 4) * 3}s`,
                   animationDuration: `${20 + (i % 6) * 5}s`
                 }}
@@ -271,28 +269,28 @@ export default function Home() {
 
         <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10 w-full flex-grow flex items-center pt-10 lg:pt-2 pb-16 lg:pb-32">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-12 items-center w-full">
-            
+
             {/* Left Content */}
             <div className="order-2 lg:order-1 space-y-8 lg:space-y-12 pt-0 z-20 text-center lg:text-left lg:-ml-12 -mt-16 lg:mt-0">
               <div className="space-y-0 mt-0 lg:-mt-54">
-                <h1 className="w-full text-center">
-                  <span className="block font-serif font-bold text-white text-[2rem] xs:text-[6.5rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[4.2rem] xl:text-[4.3rem] leading-tight mb-0.9" style={{letterSpacing:'0.009em'}}>
-                    Sri Lanka’s No 01
+                <h1 className="w-full text-center lg:text-left flex flex-col items-center lg:items-start">
+                  <span className="block font-serif font-bold text-white text-[2rem] xs:text-[3rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[4.2rem] xl:text-[4.3rem] leading-tight sm:leading-none mb-1 sm:mb-0 lg:translate-y-[15px]" style={{ letterSpacing: '0.009em' }}>
+                    Sri<span className="ml-[0.15em] sm:ml-[0.2em] md:ml-[0.25em]">Lanka’s</span> No 01
                   </span>
-                  <span className="block font-black uppercase text-green-400 text-[3.7rem] xs:text-[4.3rem] sm:text-[5.7rem] md:text-[6.7rem] lg:text-[7.7rem] xl:text-[10.5rem] leading-none mb-0 tracking-tight" style={{fontStretch:'condensed', letterSpacing:'-0.03em', textShadow:'0 2px 8px rgba(0,0,0,0.18)'}}>
+                  <span className="block font-black uppercase text-green-400 text-[3.7rem] xs:text-[4.3rem] sm:text-[5.7rem] md:text-[6.7rem] lg:text-[7.7rem] xl:text-[10.5rem] leading-[1.1] sm:leading-none mb-0 tracking-tight lg:-ml-[7px]" style={{ fontStretch: 'condensed', letterSpacing: '-0.03em', textShadow: '0 2px 8px rgba(0,0,0,0.18)' }}>
                     ONLINE
                   </span>
-                  <span className="block font-extrabold uppercase text-white text-[1.1rem] xs:text-[1.3rem] sm:text-[2rem] md:text-[2.3rem] lg:text-[2.6rem] xl:text-[2.9rem] leading-none tracking-tight mb-6" style={{letterSpacing:'0.04em'}}>
+                  <span className="block font-extrabold uppercase text-white text-[1.1rem] xs:text-[1.3rem] sm:text-[2rem] md:text-[2.3rem] lg:text-[2.6rem] xl:text-[2.9rem] leading-snug sm:leading-none tracking-tight mb-6" style={{ letterSpacing: '0.04em' }}>
                     LEARNING ACADEMY
                   </span>
                 </h1>
               </div>
-              
+
               <div className="relative animate-fadeInLeft" style={{ animationDelay: '0.4s' }}>
                 {/* Removed 'are you ready to learn?' as requested */}
               </div>
 
-              <div className="flex flex-wrap items-center justify-center gap-8 pt-0 animate-scaleIn" style={{ animationDelay: '0.6s' }}>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 pt-0 animate-scaleIn" style={{ animationDelay: '0.6s' }}>
                 <button
                   onClick={goToRegister}
                   className="mt-2 mb-2 px-10 py-3 sm:px-14 sm:py-4 md:px-16 md:py-5 lg:px-20 lg:py-6 rounded-full bg-green-400 hover:bg-green-500 text-white text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold shadow-xl transition-all duration-300 uppercase tracking-widest border-none focus:ring-4 focus:ring-green-300 focus:ring-opacity-50"
@@ -332,25 +330,25 @@ export default function Home() {
                     <div className="absolute inset-0 bg-gradient-to-br from-green-900/60 via-black to-black opacity-20 animate-gradient-shift transform-gpu" />
                     <div className="absolute inset-0 w-full h-full p-2 lg:p-3 transition-all duration-1000 transform-gpu">
                       {heroImages.map((img, index) => (
-                        <div 
+                        <div
                           key={index}
                           className={`absolute inset-0 w-full h-full transition-all duration-1000 transform flex items-center justify-center transform-gpu
                             ${currentImage === index ? 'opacity-100 scale-100' : 'opacity-0 scale-105 lg:scale-110 md:blur-lg lg:blur-xl pointer-events-none'}`}
                         >
                           <div className="relative w-full h-full rounded-full overflow-hidden border border-white/20 shadow-inner transform-gpu" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}>
-                             <img 
-                               src={img} 
-                               alt="Modern Education" 
-                               className="w-full h-full object-cover transition-transform duration-[3000ms] group-hover:scale-110 transform-gpu" 
-                             />
+                            <img
+                              src={img}
+                              alt="Modern Education"
+                              className="w-full h-full object-cover transition-transform duration-[3000ms] group-hover:scale-110 transform-gpu"
+                            />
                           </div>
                         </div>
                       ))}
                     </div>
                     <div className="absolute bottom-6 lg:bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-3 lg:gap-4 z-40 bg-black/40 backdrop-blur-md px-4 lg:px-6 py-2 lg:py-2.5 rounded-full border border-white/10">
                       {heroImages.map((_, i) => (
-                        <button 
-                          key={i} 
+                        <button
+                          key={i}
                           onClick={() => setCurrentImage(i)}
                           className={`h-2 lg:h-2.5 rounded-full transition-all duration-500 ${currentImage === i ? 'w-6 lg:w-10 bg-green-500' : 'w-2 lg:w-2.5 bg-white/20 hover:bg-white/40'}`}
                         />
@@ -367,13 +365,13 @@ export default function Home() {
 
               <div className="absolute bottom-[5%] sm:bottom-[10%] lg:bottom-[20%] right-0 lg:-right-12 hidden lg:flex flex-col gap-6 z-40 items-end">
                 <div className="flex gap-4">
-                  <button 
+                  <button
                     onClick={() => setCurrentImage((prev) => (prev - 1 + heroImages.length) % heroImages.length)}
                     className="w-10 h-10 lg:w-14 lg:h-14 rounded-xl lg:rounded-2xl border border-white/10 bg-black/40 text-white flex items-center justify-center backdrop-blur-xl hover:bg-green-600 hover:border-green-500 transition-all shadow-2xl active:scale-90"
                   >
                     <ChevronLeft className="w-5 h-5 lg:w-7 lg:h-7" />
                   </button>
-                  <button 
+                  <button
                     onClick={() => setCurrentImage((prev) => (prev + 1) % heroImages.length)}
                     className="w-10 h-10 lg:w-14 lg:h-14 rounded-xl lg:rounded-2xl border border-white/10 bg-black/40 text-white flex items-center justify-center backdrop-blur-xl hover:bg-green-600 hover:border-green-500 transition-all shadow-2xl active:scale-90"
                   >
@@ -397,22 +395,22 @@ export default function Home() {
       <section id="why-choose-section" className="py-20 lg:py-32 bg-green-50/20 relative overflow-hidden transform-gpu">
         {/* Background Decorative patterns */}
         <div className="absolute top-20 right-[-10%] w-[500px] h-[500px] bg-green-100 rounded-full blur-[120px] opacity-40 -z-10" />
-        
+
         <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-            
+
             {/* Left Column: Visual Stack */}
             <div className="relative flex justify-center lg:justify-start order-2 lg:order-1">
               <div className="relative w-full max-w-[450px] lg:max-w-[550px] aspect-square flex items-center justify-center">
-                
+
                 {/* 1. Main Green Container */}
                 <div className="absolute w-[80%] h-[75%] bg-green-500 rounded-[40px] lg:rounded-[60px] rotate-[-5deg] shadow-2xl animate-floating" />
-                
+
                 {/* 2. Main Character Image */}
                 <div className="relative w-[90%] h-[90%] z-10 overflow-hidden flex items-end justify-center">
-                  <img 
-                    src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168630/leisure-activity-women-cute-grass-technology_1_1_czh3sn.jpg" 
-                    alt="Student" 
+                  <img
+                    src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168630/leisure-activity-women-cute-grass-technology_1_1_czh3sn.jpg"
+                    alt="Student"
                     loading="lazy"
                     className="w-full h-full object-cover rounded-[35px] lg:rounded-[50px] transform transition-transform duration-700 hover:scale-105"
                   />
@@ -439,17 +437,17 @@ export default function Home() {
                   <span className="text-[8px] lg:text-sm font-bold text-gray-400 uppercase tracking-widest">Active Learners</span>
                   <div className="flex items-center">
                     <div className="flex -space-x-2 lg:-space-x-3">
-                       <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full border-2 lg:border-4 border-white overflow-hidden bg-gray-200">
-                         <img src="/about1.jpg" alt="Learner" className="w-full h-full object-cover" />
-            <img src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168606/heroimage_1_1_ono2xx.jpg" alt="Learner" className="w-full h-full object-cover" />
-                       </div>
-                       <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full border-2 lg:border-4 border-white overflow-hidden bg-gray-200">
-                         <img src="/about1.jpg" alt="Learner" className="w-full h-full object-cover" />
-                            <img src="/about1.jpg" alt="Learner" className="w-full h-full object-cover" />
-                       </div>
-                       <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full border-2 lg:border-4 border-white overflow-hidden flex items-center justify-center bg-green-500 text-white text-[8px] lg:text-[10px] font-bold">
-                         3.5k+
-                       </div>
+                      <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full border-2 lg:border-4 border-white overflow-hidden bg-gray-200">
+                        <img src="/about1.jpg" alt="Learner" className="w-full h-full object-cover" />
+                        <img src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168606/heroimage_1_1_ono2xx.jpg" alt="Learner" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full border-2 lg:border-4 border-white overflow-hidden bg-gray-200">
+                        <img src="/about1.jpg" alt="Learner" className="w-full h-full object-cover" />
+                        <img src="/about1.jpg" alt="Learner" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="w-7 h-7 lg:w-10 lg:h-10 rounded-full border-2 lg:border-4 border-white overflow-hidden flex items-center justify-center bg-green-500 text-white text-[8px] lg:text-[10px] font-bold">
+                        3.5k+
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -464,9 +462,9 @@ export default function Home() {
 
                 {/* 7. Dot Pattern */}
                 <div className="absolute bottom-[-10px] lg:bottom-[-20px] right-[15%] lg:right-[20%] w-24 h-24 lg:w-32 lg:h-32 opacity-20 -z-10 grid grid-cols-5 gap-2 lg:gap-3">
-                   {Array.from({ length: 25 }).map((_, i) => (
-                     <div key={i} className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-green-500" />
-                   ))}
+                  {Array.from({ length: 25 }).map((_, i) => (
+                    <div key={i} className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-green-500" />
+                  ))}
                 </div>
 
               </div>
@@ -481,7 +479,7 @@ export default function Home() {
                 </h2>
                 <div className="w-16 lg:w-20 h-1 lg:h-1.5 bg-green-500 rounded-full mx-auto lg:mx-0" />
               </div>
-              
+
               <p className="text-base lg:text-lg text-gray-500 leading-relaxed max-w-xl mx-auto lg:mx-0">
                 We believe that education should be accessible, engaging, and specifically designed for success. Our mission is to provide the highest quality learning materials tailored for your academic growth.
               </p>
@@ -502,7 +500,7 @@ export default function Home() {
               </ul>
 
               <div className="pt-4 lg:pt-6">
-                <Button 
+                <Button
                   onClick={scrollToAbout}
                   className="h-14 lg:h-16 px-10 lg:px-12 bg-green-600 hover:bg-green-700 text-white text-base lg:text-lg font-black rounded-full shadow-[0_20px_40px_rgba(34,197,94,0.3)] transition-all hover:scale-105 active:scale-95 uppercase tracking-widest border-none"
                 >
@@ -518,9 +516,9 @@ export default function Home() {
       {/* NEW ADDED: ABOUT SECTION */}
       <section id="about-section" className="relative py-20 lg:py-40 overflow-hidden bg-[#1b4332] contain-paint transform-gpu">
         {/* Background Image - Optimized: removed fixed attachment due to scroll jank */}
-        <div 
+        <div
           className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat will-change-transform"
-          style={{ 
+          style={{
             backgroundImage: "url('/about1.jpg')",
           }}
         >
@@ -531,10 +529,10 @@ export default function Home() {
 
         <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
-            
+
             {/* Left: Vision Content */}
             <div className="space-y-8 lg:space-y-10 animate-fadeInLeft text-center lg:text-left">
-              
+
               <h2 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white leading-[0.95] lg:leading-[0.95] uppercase tracking-tighter">
                 Sri Lanka's <br />
                 <span className="text-green-500 drop-shadow-[0_0_20px_rgba(34,197,94,0.4)]">Premier Online</span> <br />
@@ -574,20 +572,20 @@ export default function Home() {
             {/* Right: Modern Precisely Layered Composition - Responsive for all screens */}
             <div className="relative flex items-center justify-center animate-fadeInRight" style={{ animationDelay: '0.4s' }}>
               <div className="relative w-full aspect-square max-w-[400px] sm:max-w-[500px] lg:max-w-[650px] flex items-center justify-center">
-                
+
                 {/* Background Book/Page Outline Graphic (Faint) */}
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] opacity-10 pointer-events-none -z-10">
-                   <div className="w-full h-full border-[1.5px] border-green-500 rounded-[30px] lg:rounded-[40px] relative">
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1.5px] h-full bg-green-500/50" />
-                      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-[1.5px] bg-green-500/50 opacity-30" />
-                   </div>
+                  <div className="w-full h-full border-[1.5px] border-green-500 rounded-[30px] lg:rounded-[40px] relative">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1.5px] h-full bg-green-500/50" />
+                    <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-[1.5px] bg-green-500/50 opacity-30" />
+                  </div>
                 </div>
 
                 {/* Main Large Image (Top-Left Position) */}
                 <div className="absolute top-0 left-0 w-[70%] h-[60%] sm:w-[460px] sm:h-[380px] rounded-[24px] lg:rounded-[32px] overflow-hidden shadow-2xl z-20 animate-floating border-[6px] lg:border-[12px] border-white">
-                  <img 
-                    src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168612/black-hat-university-graduates-is-placed-green-leaves_1_1_s21ar8.jpg" 
-                    alt="Students Collaboration" 
+                  <img
+                    src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168612/black-hat-university-graduates-is-placed-green-leaves_1_1_s21ar8.jpg"
+                    alt="Students Collaboration"
                     loading="lazy"
                     className="w-full h-full object-cover"
                   />
@@ -595,9 +593,9 @@ export default function Home() {
 
                 {/* Overlapping Image (Bottom-Right Position) */}
                 <div className="absolute bottom-0 right-0 w-[60%] h-[50%] sm:w-[360px] sm:h-[300px] rounded-[24px] lg:rounded-[32px] overflow-hidden shadow-2xl z-30 animate-floating border-[6px] lg:border-[12px] border-white" style={{ animationDelay: '1s' }}>
-                  <img 
-                    src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168629/rear-view-man-graduation-gown-standing-against-sky_1_1_lkwabp.jpg" 
-                    alt="Academic Study" 
+                  <img
+                    src="https://res.cloudinary.com/dz0hl3qmz/image/upload/f_auto,q_auto/v1772168629/rear-view-man-graduation-gown-standing-against-sky_1_1_lkwabp.jpg"
+                    alt="Academic Study"
                     loading="lazy"
                     className="w-full h-full object-cover"
                   />
@@ -616,11 +614,11 @@ export default function Home() {
 
                 {/* Stylized Circle Graphics (Bottom-Left) */}
                 <div className="absolute bottom-[5%] left-[-10%] sm:left-[-30px] lg:left-[-60px] z-40 animate-floating scale-50 sm:scale-75 lg:scale-100">
-                   <div className="relative group">
-                      <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-44 lg:h-44 border-[6px] lg:border-[10px] border-[#1a4b8f] rounded-full animate-[spin_10s_linear_infinite]" />
-                      <div className="absolute bottom-2 lg:bottom-4 left-[75%] w-12 h-12 lg:w-20 lg:h-20 border-[4px] lg:border-[8px] border-[#ef4444] rounded-full animate-bounce-subtle" style={{ animationDelay: '0.5s' }} />
-                      <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 rounded-full blur-2xl transition-colors duration-1000" />
-                   </div>
+                  <div className="relative group">
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-44 lg:h-44 border-[6px] lg:border-[10px] border-[#1a4b8f] rounded-full animate-[spin_10s_linear_infinite]" />
+                    <div className="absolute bottom-2 lg:bottom-4 left-[75%] w-12 h-12 lg:w-20 lg:h-20 border-[4px] lg:border-[8px] border-[#ef4444] rounded-full animate-bounce-subtle" style={{ animationDelay: '0.5s' }} />
+                    <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 rounded-full blur-2xl transition-colors duration-1000" />
+                  </div>
                 </div>
 
                 {/* Ambient Glow */}
@@ -634,37 +632,37 @@ export default function Home() {
 
       {/* NEW SECTION: Expert Faculty (Customized to match requested "Latest News" style) */}
       <section id="faculty-section" className="relative pt-16 lg:pt-32 pb-24 lg:pb-40 overflow-x-hidden bg-white transform-gpu">
-        
+
         {/* BOTTOM Colored Branding Section */}
-        <div 
+        <div
           className="absolute bottom-0 left-0 w-full h-[400px] lg:h-[550px] -z-10 overflow-hidden bg-gradient-to-br from-[#2eb341] via-[#259334] to-[#15541c]"
         >
-           {/* Patterned Background Overlay - Performance Optimized to 15 symbols */}
-           <div className="absolute inset-0 opacity-[0.1] mix-blend-overlay pointer-events-none transform-gpu">
-              <div className="grid grid-cols-3 md:grid-cols-5 gap-20 lg:gap-32 p-10 rotate-12 scale-[1.5]">
-                {Array.from({ length: 15 }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="text-white text-3xl lg:text-6xl font-serif animate-floating will-change-transform"
-                    style={{ 
-                      animationDelay: `${(i % 5) * 4}s`,
-                      animationDuration: `${18 + (i % 6) * 6}s`
-                    }}
-                  >
-                    {['∑', 'π', 'θ', 'λ', '×'][i % 5]}
-                  </div>
-                ))}
-              </div>
-           </div>
-           {/* Ambient Glow */}
-           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-green-400/10 rounded-full blur-[80px] lg:blur-[120px]" />
+          {/* Patterned Background Overlay - Performance Optimized to 15 symbols */}
+          <div className="absolute inset-0 opacity-[0.1] mix-blend-overlay pointer-events-none transform-gpu">
+            <div className="grid grid-cols-3 md:grid-cols-5 gap-20 lg:gap-32 p-10 rotate-12 scale-[1.5]">
+              {Array.from({ length: 15 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="text-white text-3xl lg:text-6xl font-serif animate-floating will-change-transform"
+                  style={{
+                    animationDelay: `${(i % 5) * 4}s`,
+                    animationDuration: `${18 + (i % 6) * 6}s`
+                  }}
+                >
+                  {['∑', 'π', 'θ', 'λ', '×'][i % 5]}
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Ambient Glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-green-400/10 rounded-full blur-[80px] lg:blur-[120px]" />
         </div>
 
         <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
-          <div className="text-center mb-10 lg:mb-16 space-y-3 lg:space-y-4"> 
+          <div className="text-center mb-10 lg:mb-16 space-y-3 lg:space-y-4">
             <span className="text-[#22c55e] font-black tracking-[0.2em] uppercase text-[10px] lg:text-sm block">Expert Faculty</span>
             <h2 className="text-3xl sm:text-6xl lg:text-7xl font-black text-[#0A1D15] leading-[1.1] tracking-tighter uppercase animate-fadeIn">
-              Our Expert <span style={{ color: '#22c55e' }}>Faculty</span> <br className="sm:hidden" /> 
+              Our Expert <span style={{ color: '#22c55e' }}>Faculty</span> <br className="sm:hidden" />
               <span className="hidden sm:inline"> </span><span style={{ color: '#22c55e' }}>&</span> Educators
             </h2>
             <div className="w-12 lg:w-24 h-1 lg:h-2 mx-auto rounded-full" style={{ backgroundColor: '#22c55e' }} />
@@ -672,26 +670,26 @@ export default function Home() {
 
           {/* Marquee/Scroll Container for Teachers - Stable Infinite Loop */}
           <div className="relative group overflow-hidden">
-            <div className="flex animate-scroll-x hover:[animation-play-state:paused] py-10 transform-gpu" style={{ 
+            <div className="flex animate-scroll-x hover:[animation-play-state:paused] py-10 transform-gpu" style={{
               width: 'max-content',
-              backfaceVisibility: 'hidden', 
+              backfaceVisibility: 'hidden',
               WebkitBackfaceVisibility: 'hidden'
             }}>
               {[...teachers, ...teachers].map((teacher, idx) => (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className="flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[380px] h-[380px] sm:h-[420px] lg:h-[480px] bg-white rounded-none shadow-[10px_10px_20px_-5px_rgba(0,0,0,0.3)] group/card relative overflow-hidden transition-all duration-700 hover:-translate-y-4 transform-gpu backface-hidden mr-4 lg:mr-8 p-4 sm:p-0 flex flex-col sm:block"
-                  style={{ 
-                    backfaceVisibility: 'hidden', 
+                  style={{
+                    backfaceVisibility: 'hidden',
                     WebkitBackfaceVisibility: 'hidden',
                     contain: 'paint'
                   }}
                 >
                   {/* Image Container - Smaller on mobile, full background on desktop */}
                   <div className="relative h-56 sm:h-full w-full overflow-hidden rounded-2xl sm:rounded-none sm:absolute sm:inset-0">
-                    <img 
-                      src={teacher.img} 
-                      alt={teacher.name} 
+                    <img
+                      src={teacher.img}
+                      alt={teacher.name}
                       className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-[2000ms] group-hover/card:scale-110 transform-gpu"
                       style={{ imageRendering: 'auto', backfaceVisibility: 'hidden' }}
                     />
@@ -709,9 +707,9 @@ export default function Home() {
                     <div className="w-8 lg:w-12 h-1 lg:h-1.5 rounded-full transition-all duration-700 group-hover/card:w-full" style={{ backgroundColor: '#22c55e' }} />
 
                     <p className="text-[10px] lg:text-[11px] font-bold text-gray-600 sm:text-gray-200 uppercase leading-relaxed tracking-wider line-clamp-2">
-                       {teacher.qual}
+                      {teacher.qual}
                     </p>
-                    
+
                     <div className="pt-1">
                       <span className="px-2 lg:px-3 py-1 border rounded-full text-[8px] lg:text-[10px] font-black uppercase tracking-widest inline-block" style={{ backgroundColor: 'rgba(34, 197, 94, 0.2)', borderColor: 'rgba(34, 197, 94, 0.3)', color: '#15803d' }}>
                         {teacher.subject}
@@ -727,9 +725,9 @@ export default function Home() {
 
             {/* Pagination Dots (Visual only, to match image style) */}
             <div className="flex justify-center gap-2 mt-4 lg:mt-8 opacity-40">
-               <div className="w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-full" style={{ backgroundColor: '#15803d' }} />
-               <div className="w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-full" style={{ backgroundColor: 'rgba(21, 128, 61, 0.4)' }} />
-               <div className="w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-full" style={{ backgroundColor: 'rgba(21, 128, 61, 0.4)' }} />
+              <div className="w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-full" style={{ backgroundColor: '#15803d' }} />
+              <div className="w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-full" style={{ backgroundColor: 'rgba(21, 128, 61, 0.4)' }} />
+              <div className="w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-full" style={{ backgroundColor: 'rgba(21, 128, 61, 0.4)' }} />
             </div>
           </div>
         </div>
@@ -737,11 +735,11 @@ export default function Home() {
 
       {/* SL Post Tracking Banner Section */}
       <section className="relative py-4 sm:py-8 bg-white flex justify-center items-center overflow-hidden">
-        <div 
-          className="w-full max-w-[95vw] sm:max-w-2xl md:max-w-4xl flex flex-col md:flex-row items-stretch md:items-center md:justify-between gap-3 sm:gap-8 px-2 sm:px-6 md:px-10 py-3 sm:py-8 rounded-2xl shadow-2xl" 
-          style={{ 
-            background: 'linear-gradient(135deg, #21822E 0%, #22c55e 100%)', 
-            border: '1px solid #16a34a99' 
+        <div
+          className="w-full max-w-[95vw] sm:max-w-2xl md:max-w-4xl flex flex-col md:flex-row items-stretch md:items-center md:justify-between gap-3 sm:gap-8 px-2 sm:px-6 md:px-10 py-3 sm:py-8 rounded-2xl shadow-2xl"
+          style={{
+            background: 'linear-gradient(135deg, #21822E 0%, #22c55e 100%)',
+            border: '1px solid #16a34a99'
           }}
         >
           <div className="flex-1 w-full text-center md:text-left mb-4 md:mb-0 flex flex-col justify-center">
@@ -766,13 +764,13 @@ export default function Home() {
         <div className="absolute -bottom-8 -right-8 w-20 xs:w-28 sm:w-40 h-20 xs:h-28 sm:h-40 bg-green-900/20 rounded-full blur-2xl z-0" />
       </section>
 
-      
+
       {/* Modern Compact Footer */}
       <footer className="relative bg-[#0A1D15] pt-12 lg:pt-16 pb-6 lg:pb-8 overflow-hidden border-t border-white/5">
         {/* Ambient background decoration */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-green-500/50 to-transparent" />
         <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-green-500/5 rounded-full blur-[100px] pointer-events-none" />
-        
+
         <div className="max-w-[1400px] mx-auto px-6 lg:px-12 relative z-10">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-12 pb-8 lg:pb-10 border-b border-white/5">
             {/* Brand Section */}
@@ -812,18 +810,18 @@ export default function Home() {
             {/* Social icons */}
             <div className="flex items-center gap-4">
               {[
-                { 
-                  Icon: Facebook, 
+                {
+                  Icon: Facebook,
                   href: "https://www.facebook.com/eduranonlineacademy/",
                   hoverColor: "hover:bg-blue-600"
                 },
-                { 
-                  Icon: Instagram, 
+                {
+                  Icon: Instagram,
                   href: "https://www.instagram.com/eduran.lk/",
                   hoverColor: "hover:bg-pink-600"
                 },
-                { 
-                  Icon: Youtube, 
+                {
+                  Icon: Youtube,
                   href: "https://www.youtube.com/@EduranOnlineAcademy",
                   hoverColor: "hover:bg-red-600"
                 },
@@ -831,16 +829,16 @@ export default function Home() {
                   isCustom: true,
                   Icon: () => (
                     <svg viewBox="0 0 24 24" className="w-4.5 h-4.5 fill-current" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .8.11V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.86 4.51A6.25 6.25 0 0 0 15.82 16V6.26a8.27 8.27 0 0 0 5.18 1.84V4.65a4.83 4.83 0 0 1-1.41-.26 4.83 4.83 0 0 1-1.41-.26z"/>
+                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .8.11V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.86 4.51A6.25 6.25 0 0 0 15.82 16V6.26a8.27 8.27 0 0 0 5.18 1.84V4.65a4.83 4.83 0 0 1-1.41-.26 4.83 4.83 0 0 1-1.41-.26z" />
                     </svg>
                   ),
                   href: "https://www.tiktok.com/@eduran.lk?is_from_webapp=1&sender_device=pc",
                   hoverColor: "hover:bg-black"
                 }
               ].map((social, i) => (
-                <a 
-                  key={i} 
-                  href={social.href} 
+                <a
+                  key={i}
+                  href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`w-10 h-10 lg:w-11 lg:h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white ${social.hoverColor} hover:border-transparent hover:text-white transition-all duration-300 group hover:-translate-y-1`}
@@ -861,14 +859,14 @@ export default function Home() {
       </footer>
 
       {/* Floating WhatsApp Join Button - Icon expands to text on hover */}
-      <a 
+      <a
         href="https://wa.me/94743511396"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-8 right-8 z-[100] flex items-center bg-[#25D366] text-white h-14 px-4 rounded-full shadow-[0_10px_30px_rgba(37,211,102,0.4)] transition-all duration-500 hover:scale-110 hover:bg-[#20ba59] active:scale-95 group overflow-hidden"
       >
-        <svg 
-          viewBox="0 0 24 24" 
+        <svg
+          viewBox="0 0 24 24"
           className="w-7 h-7 fill-white shrink-0"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -877,7 +875,7 @@ export default function Home() {
         <span className="max-w-0 opacity-0 group-hover:max-w-xs group-hover:opacity-100 group-hover:ml-3 transition-all duration-500 ease-in-out overflow-hidden whitespace-nowrap font-bold text-sm tracking-wide">
           Click now to join the class!
         </span>
-        
+
         {/* Pulsing indicator */}
         <span className="absolute -top-1 -left-1 flex h-4 w-4">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>

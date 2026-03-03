@@ -66,6 +66,14 @@ exports.register = async (req, res) => {
             console.warn('Registration failed: User already exists for email', req.body.email);
             return res.status(400).json({ message: 'User already exists' });
         }
+        // Check for duplicate NIC
+        if (req.body.nic) {
+            const [nicRows] = await require('../config/db').execute('SELECT id FROM users WHERE nic = ?', [req.body.nic]);
+            if (nicRows.length > 0) {
+                console.warn('Registration failed: NIC already exists', req.body.nic);
+                return res.status(400).json({ message: 'NIC number already registered' });
+            }
+        }
 
         // Encrypt the password using bcrypt SALT and our JWT_SECRET PEPPER 
         console.log('Generating secure storage for:', req.body.email);

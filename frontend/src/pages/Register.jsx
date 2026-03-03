@@ -30,6 +30,7 @@ export default function RegisterPage() {
   const [allTeachers, setAllTeachers] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -127,6 +128,19 @@ export default function RegisterPage() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setShowValidation(true);
+    // Check for duplicate NIC before any other validation
+    try {
+      const res = await fetch(`${API_URL}/users?nic=${formData.nic}`);
+      const existing = await res.json();
+      if (Array.isArray(existing) && existing.length > 0) {
+        setError('NIC number already registered');
+        toast.error('NIC number already registered');
+        return;
+      }
+    } catch (err) {
+      // If error, allow registration (or handle as needed)
+    }
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       toast.error('Passwords do not match');
@@ -253,12 +267,10 @@ export default function RegisterPage() {
           <CardContent className="p-5 sm:p-8 md:p-12">
             <form onSubmit={handleRegister} className="space-y-8 sm:space-y-10">
               
-              {error && (
-                <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-4 flex gap-3 items-center animate-shake">
-                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                  <p className="text-[10px] sm:text-xs font-bold text-red-200 uppercase tracking-widest leading-normal">{error}</p>
-                </div>
-              )}
+              <div className={error ? "bg-red-500/10 border border-red-500/50 rounded-xl p-4 flex gap-3 items-center animate-shake" : "hidden"}>
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                <p className="text-[10px] sm:text-xs font-bold text-red-200 uppercase tracking-widest leading-normal">{error}</p>
+              </div>
 
               {/* Personal Info Section */}
               <div className="space-y-6">
@@ -267,9 +279,9 @@ export default function RegisterPage() {
                   <h3 className="text-white font-black uppercase tracking-[0.2em] text-[10px] sm:text-[11px]">Identity Details</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-                  <FormInput label="First Name" id="firstName" placeholder="JOHN" icon={<User />} value={formData.firstName} onChange={handleInputChange} />
-                  <FormInput label="Last Name" id="lastName" placeholder="DOE" icon={<User />} value={formData.lastName} onChange={handleInputChange} />
-                  <FormInput label="NIC Number" id="nic" placeholder="2001XXXXXXXX" icon={<Lock className="w-3 h-3"/>} value={formData.nic} onChange={handleInputChange} />
+                  <FormInput label="First Name" id="firstName" placeholder="First Name" icon={<User />} value={formData.firstName} onChange={handleInputChange} showValidation={showValidation} />
+                  <FormInput label="Last Name" id="lastName" placeholder="Last Name" icon={<User />} value={formData.lastName} onChange={handleInputChange} showValidation={showValidation} />
+                  <FormInput label="NIC Number" id="nic" placeholder="2001XXXXXXXX" icon={<Lock className="w-3 h-3"/>} value={formData.nic} onChange={handleInputChange} showValidation={showValidation} maxLength={12} />
                 </div>
               </div>
 
@@ -280,9 +292,9 @@ export default function RegisterPage() {
                   <h3 className="text-white font-black uppercase tracking-[0.2em] text-[10px] sm:text-[11px]">Communication</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-                  <FormInput label="Email Address" id="email" type="email" placeholder="HELLO@EDURA.COM" icon={<Mail />} value={formData.email} onChange={handleInputChange} />
-                  <FormInput label="Primary Phone" id="phoneNumber1" placeholder="+94 7X XXX XXXX" icon={<Phone />} value={formData.phoneNumber1} onChange={handleInputChange} />
-                  <FormInput label="Home Address" id="homeAddress" placeholder="STREET, CITY" icon={<MapPin />} value={formData.homeAddress} onChange={handleInputChange} isFullWidth />
+                  <FormInput label="Email Address" id="email" type="email" placeholder="your@gmail.com" icon={<Mail />} value={formData.email} onChange={handleInputChange} showValidation={showValidation} />
+                  <FormInput label="Phone Number" id="phoneNumber1" placeholder="+94 7X XXX XXXX" icon={<Phone />} value={formData.phoneNumber1} onChange={handleInputChange} showValidation={showValidation} />
+                  <FormInput label="Home Address" id="homeAddress" placeholder="STREET, CITY" icon={<MapPin />} value={formData.homeAddress} onChange={handleInputChange} isFullWidth showValidation={showValidation} />
                 </div>
               </div>
 
@@ -293,7 +305,7 @@ export default function RegisterPage() {
                   <h3 className="text-white font-black uppercase tracking-[0.2em] text-[10px] sm:text-[11px]">Academic Background</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 sm:gap-6">
-                  <FormInput label="School" id="school" placeholder="SCHOOL NAME" icon={<School />} value={formData.school} onChange={handleInputChange} />
+                  <FormInput label="School" id="school" placeholder="SCHOOL NAME" icon={<School />} value={formData.school} onChange={handleInputChange} showValidation={showValidation} />
                   
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-green-500 ml-1">AL Year</label>
@@ -492,8 +504,8 @@ export default function RegisterPage() {
                   <h3 className="text-white font-black uppercase tracking-[0.2em] text-[10px] sm:text-[11px]">Security Keys</h3>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-                  <FormInput label="Create Password" id="password" type="password" placeholder="••••••••" icon={<Lock />} value={formData.password} onChange={handleInputChange} />
-                  <FormInput label="Confirm Password" id="confirmPassword" type="password" placeholder="••••••••" icon={<Lock />} value={formData.confirmPassword} onChange={handleInputChange} />
+                  <FormInput label="Create Password" id="password" type="password" placeholder="••••••••" icon={<Lock />} value={formData.password} onChange={handleInputChange} showValidation={showValidation} />
+                  <FormInput label="Confirm Password" id="confirmPassword" type="password" placeholder="••••••••" icon={<Lock />} value={formData.confirmPassword} onChange={handleInputChange} showValidation={showValidation} />
                 </div>
               </div>
 
@@ -531,7 +543,9 @@ export default function RegisterPage() {
 }
 
 // Reusable Sub-component for Inputs to keep code clean
-function FormInput({ label, id, type = "text", placeholder, icon, value, onChange, isFullWidth = false }) {
+function FormInput({ label, id, type = "text", placeholder, icon, value, onChange, isFullWidth = false, showValidation = false, ...props }) {
+  // Add red border if showValidation is true and value is empty
+  const isInvalid = showValidation && !value;
   return (
     <div className={`space-y-2 group ${isFullWidth ? 'sm:col-span-2' : ''}`}>
       <label className="text-[10px] font-black uppercase tracking-widest text-green-500 ml-1">{label}</label>
@@ -541,7 +555,9 @@ function FormInput({ label, id, type = "text", placeholder, icon, value, onChang
         </div>
         <Input 
           id={id} type={type} placeholder={placeholder} value={value} onChange={onChange} required
-          className="h-12 sm:h-13 bg-white/5 border-white/10 pl-12 text-white placeholder:text-white/10 focus:ring-green-500/20 focus:border-green-500/50 transition-all rounded-xl text-xs sm:text-sm"
+          className={`h-12 sm:h-13 bg-white/5 border-white/10 pl-12 text-white placeholder:text-white/10 focus:ring-green-500/20 focus:border-green-500/50 transition-all rounded-xl text-xs sm:text-sm ${isInvalid ? 'border-red-500 ring-2 ring-red-500/40 shadow-[0_0_0_2px_rgba(239,68,68,0.3)]' : ''}`}
+          aria-invalid={isInvalid}
+          {...props}
         />
       </div>
     </div>

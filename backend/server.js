@@ -1,5 +1,7 @@
 
 
+const dotenv = require('dotenv');
+dotenv.config();
 const express = require('express');
 const cors = require('cors');
 const db = require('./config/db');
@@ -16,8 +18,8 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/student/login', (req, res) => {
     const { email, password } = req.body;
     // Only allow login for the hardcoded student
-    const STUDENT_EMAIL = process.env.STUDENT_EMAIL || 'student123@gmail.com';
-    const STUDENT_PASSWORD = process.env.STUDENT_PASSWORD || 'student123';
+    const STUDENT_EMAIL = process.env.STUDENT_EMAIL;
+    const STUDENT_PASSWORD = process.env.STUDENT_PASSWORD;
     if (
         email === STUDENT_EMAIL &&
         password === STUDENT_PASSWORD
@@ -37,8 +39,6 @@ app.post('/student/login', (req, res) => {
         return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 });
-const dotenv = require('dotenv');
-
 
 // Basic route
 app.get('/', (req, res) => {

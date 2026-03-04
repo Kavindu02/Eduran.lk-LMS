@@ -257,38 +257,13 @@ export default function StudentLessons() {
                                 onValueChange={v => setSelectedTeacherId(v)}
                                 disabled={!selectedSubjectId}
                             >
-                                <SelectTrigger className="h-14 md:h-16 bg-slate-50 border-slate-200 text-slate-800 rounded-xl md:rounded-2xl font-bold px-4 md:px-6 shadow-inner">
-                                    <div className="flex items-center gap-3 md:gap-4">
+                                <SelectTrigger className="h-14 md:h-16 bg-slate-50 border-slate-200 text-slate-800 rounded-xl md:rounded-2xl font-bold px-4 md:px-6 shadow-inner cursor-pointer w-full">
+                                    <div className="flex items-center gap-3 md:gap-4 w-full justify-center">
                                         <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
                                             <User className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                         </div>
-                                        <div className="truncate text-left text-xs md:text-sm font-bold flex items-center gap-2">
-                                            {/* Show teacher name and payment badge if a teacher is selected, and update on month/teacher change */}
-                                            {(() => {
-                                                const currentSub = userSubjects.find(s => String(s.id) === String(selectedSubjectId));
-                                                if (!currentSub) return <SelectValue placeholder="All Registered Teachers" />;
-                                                if (selectedTeacherId === 'all') return <SelectValue placeholder="All Registered Teachers" />;
-                                                const teacher = (currentSub.teachers || []).find(t => String(t.id) === String(selectedTeacherId));
-                                                if (!teacher) return <SelectValue placeholder="All Registered Teachers" />;
-                                                // Check payment for selected month (teacher-level or subject-level)
-                                                const now = new Date();
-                                                const year = now.getFullYear();
-                                                // 1. Try to find a teacher-level payment
-                                                let paid = paidMonths.some(m => Number(m.year) === year && Number(m.month) === Number(selectedMonth) && m.status === 'paid' && String(m.teacherId) === String(selectedTeacherId));
-                                                // 2. If not found, try to find a subject-level payment (no teacherId or teacherId is null/undefined)
-                                                if (!paid) {
-                                                    paid = paidMonths.some(m => Number(m.year) === year && Number(m.month) === Number(selectedMonth) && m.status === 'paid' && (!m.teacherId || m.teacherId === null || m.teacherId === undefined));
-                                                }
-                                                return <>
-                                                    <span>{teacher.name}</span>
-                                                    <span className={paid
-                                                        ? "bg-green-50 text-green-600 text-[10px] md:text-xs px-3 py-1 rounded-full border border-green-100 font-bold uppercase tracking-widest ml-1"
-                                                        : "bg-red-50 text-red-500 text-[10px] md:text-xs px-3 py-1 rounded-full border border-red-100 font-bold uppercase tracking-widest ml-1"
-                                                    }>
-                                                        {paid ? 'PAID' : 'UNPAID'}
-                                                    </span>
-                                                </>;
-                                            })()}
+                                        <div className="truncate text-center text-xs md:text-sm font-bold flex items-center gap-2 w-full justify-center">
+                                            <SelectValue placeholder="ALL REGISTERED TEACHERS" />
                                         </div>
                                     </div>
                                 </SelectTrigger>
@@ -306,16 +281,25 @@ export default function StudentLessons() {
                             {/* Choose Month Dropdown */}
                             <div>
                                 <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 mb-1 block">Choose Month</label>
-                                <select
-                                    value={selectedMonth}
-                                    onChange={e => setSelectedMonth(e.target.value)}
-                                    className="h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:ring-2 focus:ring-emerald-500 outline-none w-full"
-                                >
-                                    <option value="">Choose Month</option>
-                                    {Array.from({ length: 12 }, (_, i) => (
-                                        <option key={i+1} value={i+1}>{new Date(0, i).toLocaleString('default', { month: 'long' })}</option>
-                                    ))}
-                                </select>
+                                <Select value={String(selectedMonth)} onValueChange={v => setSelectedMonth(v)} disabled={!selectedSubjectId}>
+                                    <SelectTrigger className="h-14 md:h-16 bg-slate-50 border-slate-200 text-slate-800 rounded-xl md:rounded-2xl font-bold px-4 md:px-6 shadow-inner cursor-pointer w-full">
+                                        <div className="flex items-center gap-3 md:gap-4 w-full justify-center">
+                                            <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                                <BookOpen className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                            </div>
+                                            <div className="truncate text-center text-xs md:text-sm font-bold flex items-center gap-2 w-full justify-center">
+                                                <SelectValue placeholder="Choose Month" />
+                                            </div>
+                                        </div>
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white border-slate-200 text-slate-800 font-sans p-2 rounded-2xl shadow-2xl overflow-hidden max-w-[calc(100vw-3rem)]">
+                                        {Array.from({ length: 12 }, (_, i) => (
+                                            <SelectItem key={i+1} value={String(i+1)} className={`rounded-xl font-bold py-3 uppercase text-[10px] md:text-xs text-center ${Number(selectedMonth) === i+1 ? 'bg-emerald-500 text-white' : 'bg-white text-slate-800'}`}>
+                                                {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                     </div>

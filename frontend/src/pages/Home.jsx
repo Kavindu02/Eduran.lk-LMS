@@ -234,7 +234,7 @@ export default function Home() {
                   <div className="absolute -inset-0.5 bg-green-500 rounded-full opacity-0 group-hover:opacity-40 blur transition duration-500" />
                   <Button className="relative h-10 md:h-12 px-5 md:px-10 bg-green-600 hover:bg-green-700 text-white text-[9px] md:text-[11px] font-black tracking-[0.25em] rounded-full transition-all duration-500 uppercase shadow-[4px_4px_0_0_rgba(34,197,94,0.3)] active:scale-95 border-none flex items-center gap-2 pointer-events-none">
                     <LayoutDashboard className="w-4 h-4 md:w-4 md:h-4" />
-                    <span className="relative hidden md:inline">GET STARTED</span>
+                    <span className="relative hidden md:inline">LOGIN</span>
                   </Button>
                 </Link>
               </div>

@@ -162,9 +162,9 @@ export default function LoginPage() {
 
                         <div className="mt-8 flex flex-col items-center gap-4 text-center">
                             <p className="text-white/40 text-[11px] font-bold uppercase tracking-widest">
-                                New here?{' '}
+                                Don't have an account?{' '}
                                 <Link to="/register" className="text-green-500 hover:text-green-400 transition-colors underline underline-offset-4">
-                                    Create Account
+                                    register now
                                 </Link>
                             </p>
                             <Link to="/" className="text-[10px] text-white/20 hover:text-white transition-colors uppercase tracking-[0.3em]">

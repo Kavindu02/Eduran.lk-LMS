@@ -165,12 +165,22 @@ exports.deleteUser = async (req, res) => {
 exports.updateUserStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { is_blocked, payment_status, ...otherUpdates } = req.body;
-        
+        const { is_blocked, payment_status, password, ...otherUpdates } = req.body;
         const updates = { ...otherUpdates };
         if (is_blocked !== undefined) updates.is_blocked = is_blocked;
         if (payment_status !== undefined) updates.payment_status = payment_status;
-        
+
+        // Only hash and update password if it's a non-empty string
+        if (typeof password === 'string' && password.trim() !== '') {
+            const SALT_PEPPER = process.env.JWT_SECRET || 'fallback_pepper_123';
+            const passwordWithPepper = password + SALT_PEPPER;
+            const salt = await bcrypt.genSalt(10);
+            updates.password = await bcrypt.hash(passwordWithPepper, salt);
+        } else {
+            // Remove password from update if blank or not provided
+            delete updates.password;
+        }
+
         if (Object.keys(updates).length === 0) {
             return res.status(400).json({ error: 'No updates provided' });
         }

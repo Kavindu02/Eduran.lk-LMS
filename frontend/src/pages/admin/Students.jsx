@@ -88,14 +88,21 @@ export default function StudentsPage() {
 
     const handleUpdate = async () => {
         try {
+            const payload = { ...editData };
+            // If password is blank, remove it from payload
+            if (typeof payload.password === 'string' && payload.password.trim() === '') {
+                delete payload.password;
+            }
             const res = await fetch(`/api/users/${selectedStudent.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(editData)
+                body: JSON.stringify(payload)
             });
             if (res.ok) {
                 toast.success('Student updated successfully');
                 setIsEditDialogOpen(false);
+                // Clear password field after update
+                setEditData(ed => ({ ...ed, password: '' }));
                 loadStudents();
             } else {
                 toast.error('Failed to update student');
@@ -371,6 +378,19 @@ export default function StudentsPage() {
                                     className="h-10 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20"
                                     value={editData.homeAddress}
                                     onChange={(e) => setEditData({...editData, homeAddress: e.target.value})}
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase text-slate-400 tracking-tighter flex items-center gap-1">
+                                    <ShieldCheck className="w-3 h-3 text-emerald-500" /> Password
+                                </label>
+                                <Input 
+                                    type="password"
+                                    className="h-10 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/20"
+                                    placeholder="Enter new password"
+                                    value={editData.password || ''}
+                                    onChange={(e) => setEditData({...editData, password: e.target.value})}
                                 />
                             </div>
 
